@@ -32,7 +32,8 @@ def _get_max_from_previous(prev_weight, curr_week):
     # 2 => 1
     # 1 => 3 (Skips zero)
     prev_week = last_week if last_week != 0 else len(weeks) - 1
-    return prev_weight / weeks[prev_week].percent
+    max_weight = prev_weight / weeks[prev_week].percent
+    return max_weight
 
 
 def calc_warmup_sets(max_weight, unit='lbs'):
@@ -43,7 +44,7 @@ def calc_warmup_sets(max_weight, unit='lbs'):
     return list(map(calc_warmups, percents))
 
 
-def build_sets(prev_weight, curr_week, unit='lbs'):
+def build_sets(prev_weight, curr_week, unit='lbs', increment=0):
     """Create sets based off last week's top weight.
 
     :param int max_weight: Training max weight.
@@ -53,12 +54,14 @@ def build_sets(prev_weight, curr_week, unit='lbs'):
     """
     ceiling_func = _get_ceiling(unit)
     max_weight = _get_max_from_previous(prev_weight, curr_week)
+    # Bump weight if this is the start of a new cycle
+    max_weight += increment if curr_week == 1 else 0
     # Create warm-up sets
-    sets = calc_warmup_sets()
+    sets = calc_warmup_sets(max_weight, unit)
 
+    # We work our way up to the top percent
     for i in (2, 1, 0):
         # Subtract 10% to only use a 90% training max
-        # We work our way up to the top percent
         training_percent = weeks[curr_week].percent - 0.1 * i
         weight = ceiling_func(training_percent * max_weight)
         sets.append(weight)
@@ -67,7 +70,7 @@ def build_sets(prev_weight, curr_week, unit='lbs'):
     return sets
 
 
-def print_exercise(prev_weight, week):
+def print_exercise(prev_weight, week, increment=0):
     """Build sets for a given exercise.
 
     :param prev_weight: Top working-set weight used last week.
@@ -75,12 +78,13 @@ def print_exercise(prev_weight, week):
         weights calculated for. Accepts 1-3.
     """
     # Don't forget to add weight if you're calculating off week 3 weight!
-    weights = build_sets(max_weight=127/0.85, new_percent=0.90)
+    weights = build_sets(prev_weight, week,
+                         unit='lbs', increment=increment)
     # Output w/ reps
     print('\n<=== Sets (Week {d}) ===>'.format(week))
-    print(zip_sets(weights, week))
+    print(zip_sets(weights, weeks[week].reps))
     print('- In kgs, (-20): {}\n'
-          .format(zip_sets(lbs2kg(weights, sub=20), week)))
+          .format(zip_sets(lbs2kg(weights, sub=20), weeks[week].reps)))
 
 
 if __name__ == "__main__":
