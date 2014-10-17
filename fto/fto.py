@@ -59,11 +59,10 @@ def build_sets(prev_weight, curr_week, unit='lbs', increment=0):
     # Create warm-up sets
     sets = calc_warmup_sets(max_weight, unit)
 
-    # We work our way up to the top percent
     for i in (2, 1, 0):
-        # Subtract 10% to only use a 90% training max
+        # Ramp up our percents
         training_percent = weeks[curr_week].percent - 0.1 * i
-        weight = ceiling_func(training_percent * max_weight)
+        weight = ceiling_func(max_weight * training_percent)
         sets.append(weight)
     if unit is "kg":
         sets = lbs2kg(sets)
