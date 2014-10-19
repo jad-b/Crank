@@ -57,7 +57,7 @@ def one_rep(weight, week=1, inc=5):
 def zip_sets(weights, week=1):
     """Attach repeptitions to given weights."""
     warm_up_reps = (5, 5, 3)
-    reps = warm_up_reps + _weeks[week-1]
+    reps = warm_up_reps + _weeks[week].reps
     sets = zip(weights, reps)
     output = ''
     for s in sets:

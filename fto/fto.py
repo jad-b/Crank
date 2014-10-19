@@ -69,7 +69,7 @@ def build_sets(prev_weight, curr_week, unit='lbs', increment=0):
     return sets
 
 
-def print_exercise(prev_weight, week, increment=0):
+def print_exercise(prev_weight, week, increment=5):
     """Build sets for a given exercise.
 
     :param prev_weight: Top working-set weight used last week.
@@ -80,13 +80,13 @@ def print_exercise(prev_weight, week, increment=0):
     weights = build_sets(prev_weight, week,
                          unit='lbs', increment=increment)
     # Output w/ reps
-    print('\n<=== Sets (Week {d}) ===>'.format(week))
-    print(zip_sets(weights, weeks[week].reps))
+    print('\n<=== Sets (Week {}) ===>'.format(week))
+    print(zip_sets(weights, week))
     print('- In kgs, (-20): {}\n'
-          .format(zip_sets(lbs2kg(weights, sub=20), weeks[week].reps)))
+          .format(zip_sets(lbs2kg(weights, sub=20), week)))
 
 
 if __name__ == "__main__":
-    last_weeks_weight = 185
-    current_training_week = 1
+    last_weeks_weight = 110
+    current_training_week = 2
     print_exercise(last_weeks_weight, current_training_week)
