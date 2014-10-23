@@ -4,22 +4,30 @@ fto.py
 ===
 Calculator for weights on the 5/3/1 plan by Jim Wendler.
 """
+from enum import Enum
 from math import ceil as fine_ceil
 from .util import (ceiling as coarse_ceil,
                    map_weeks, zip_sets, lbs2kg)
 
 
+class MassUnit(str, Enum):
+    """Enum for standardizing unit of mass abbreviations."""
+    pounds = 'lbs'
+    lbs = pounds
+    kilograms = 'kgs'
+    kgs = kilograms
+
 weeks = map_weeks()
 
 
-def _get_ceiling(unit='lbs'):
+def _get_ceiling(unit=MassUnit.lbs):
     """Return correct ceiling function by units.
 
     Python's `ceil` function rounds to the nearest integer, while 5/3/1 calls
     for rounding to the nearest multiple of five. We use the finer-grained
     :func:`ceil` when in kilograms, since jumps of 1 kg are possible.
     """
-    return coarse_ceil if unit == 'lbs' else fine_ceil
+    return coarse_ceil if unit == MassUnit.lbs else fine_ceil
 
 
 def _get_max_from_previous(prev_weight, curr_week):
@@ -36,7 +44,7 @@ def _get_max_from_previous(prev_weight, curr_week):
     return max_weight
 
 
-def calc_warmup_sets(max_weight, unit='lbs'):
+def calc_warmup_sets(max_weight, unit=MassUnit.lbs):
     """Return warm-up sets, based on top weight of the day."""
     percents = (0.4, 0.5, 0.6)
     ceiling_func = _get_ceiling(unit)
@@ -44,7 +52,7 @@ def calc_warmup_sets(max_weight, unit='lbs'):
     return list(map(calc_warmups, percents))
 
 
-def build_sets(prev_weight, curr_week, unit='lbs', increment=0):
+def build_sets(prev_weight, curr_week, unit=MassUnit.lbs, increment=0):
     """Create sets based off last week's top weight.
 
     :param int max_weight: Training max weight.
@@ -64,12 +72,12 @@ def build_sets(prev_weight, curr_week, unit='lbs', increment=0):
         training_percent = weeks[curr_week].percent - 0.1 * i
         weight = ceiling_func(max_weight * training_percent)
         sets.append(weight)
-    if unit is "kg":
+    if unit is MassUnit.kilograms:
         sets = lbs2kg(sets)
     return sets
 
 
-def print_exercise(prev_weight, week, increment=5):
+def print_exercise(prev_weight, week, unit, increment=5):
     """Build sets for a given exercise.
 
     :param prev_weight: Top working-set weight used last week.
@@ -77,16 +85,19 @@ def print_exercise(prev_weight, week, increment=5):
         weights calculated for. Accepts 1-3.
     """
     # Don't forget to add weight if you're calculating off week 3 weight!
-    weights = build_sets(prev_weight, week,
-                         unit='lbs', increment=increment)
+    weights = build_sets(prev_weight, week, unit, increment)
     # Output w/ reps
     print('\n<=== Sets (Week {}) ===>'.format(week))
     print(zip_sets(weights, week))
-    print('- In kgs, (-20): {}\n'
-          .format(zip_sets(lbs2kg(weights, sub=20), week)))
+
+    if unit == MassUnit.lbs:
+        print('- In kgs, (-20): {}\n'
+              .format(zip_sets(lbs2kg(weights, sub=20), week)))
 
 
 if __name__ == "__main__":
-    last_weeks_weight = 110
-    current_training_week = 2
-    print_exercise(last_weeks_weight, current_training_week)
+    last_weeks_weight = 207
+    current_training_week = 3
+    # units = MassUnit.kgs
+    units = MassUnit.lbs
+    print_exercise(last_weeks_weight, current_training_week, units)

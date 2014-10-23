@@ -47,6 +47,17 @@ def lbs2kg(sets, sub=0):
     return (lb_kg(x) for x in sets)
 
 
+def kgs2lbs(sets, sub=0):
+    """Convert a set of weights in kilograms to pounds.
+
+    :param list sets: Iterable of prescribed weights.
+    :param int sub: Amount to subtract from each converted weight. Useful
+    for when taking into account bar weight.
+    """
+    kg_lb = lambda w: int(round(w * 2.20462) - sub)
+    return (kg_lb(x) for x in sets)
+
+
 def one_rep(weight, week=1, inc=5):
     """Calculate one rep max from week's percentage."""
     percents = (0.85, 0.9, 0.95)
