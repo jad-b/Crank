@@ -77,7 +77,7 @@ def build_sets(prev_weight, curr_week, unit=MassUnit.lbs, increment=0):
     return sets
 
 
-def print_exercise(name='', prev_weight, week, unit, increment=5):
+def print_exercise(name, prev_weight, week, unit, increment=5):
     """Build sets for a given exercise.
 
     :param prev_weight: Top working-set weight used last week.
