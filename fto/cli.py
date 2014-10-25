@@ -6,7 +6,7 @@ User-facing command-line functions for :module:`fto`.
 """
 import string
 
-from .fto import print_exercise, MassUnit
+from fto.fto import print_exercise, MassUnit
 
 
 def process_input(units='lbs'):
