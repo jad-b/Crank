@@ -28,15 +28,15 @@ class TestCalcWarmupSets(TestCase):
     def test_simple_case(self):
         """Test we return warm-up sets at correct percent of max weight."""
         expected = (40, 50, 60)
-        actual = fto.calc_warmpup_sets(self.max_weight)
+        actual = fto.calc_warmup_sets(self.max_weight)
         self.assertEqual(actual, expected)
 
     def test_units_are_kgs(self):
         """Test we use the correct ceiling when in kilograms."""
         max_weight = 77
 
-        kgs_actual = fto.calc_warmpup_sets(max_weight, unit='kgs')
-        lbs_actual = fto.calc_warmpup_sets(max_weight, unit='lbs')
+        kgs_actual = fto.calc_warmup_sets(max_weight, unit='kgs')
+        lbs_actual = fto.calc_warmup_sets(max_weight, unit='lbs')
 
         # Assert we produced a different output, as rough stand-in for
         # testing it was more-granular
