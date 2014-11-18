@@ -45,6 +45,15 @@ class Cranky(object):
         while self.crankable():
             yield self.crank()
 
+    def setify(self, sets=None):
+        sets_ = self.sets if sets is None else sets
+
+        return sorted(((n, sets_.count(n)) for n in set(sets_)), reverse=True)
+
+    def __str__(self):
+        return ', '.join(('{} ({})'.format(x, y) for x, y in \
+                          self.setify(self.sets)))
+
 
 class Accumulator(Cranky):
     """Manages the accumulating phase of Crank.
