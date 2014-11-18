@@ -8,6 +8,7 @@ Progresses in a pyramid-style scheme, where reps and sets are initially added,
 and then consolidated once an arbitrary critical number of total reps have been
 reached.
 """
+from util import get_timestamp_header
 
 
 class Cranky(object):
@@ -51,8 +52,10 @@ class Cranky(object):
         return sorted(((n, sets_.count(n)) for n in set(sets_)), reverse=True)
 
     def __str__(self):
-        return ', '.join(('{} ({})'.format(x, y) for x, y in \
+        header = get_timestamp_header()
+        sets = ', '.join(('{} ({})'.format(x, y) for x, y in
                           self.setify(self.sets)))
+        return '{header}\n{sets}'.format(header=header, sets=sets)
 
 
 class Accumulator(Cranky):
