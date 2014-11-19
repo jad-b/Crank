@@ -6,6 +6,8 @@ Calculator for weights on the 5/3/1 plan by Jim Wendler.
 """
 from enum import Enum
 from math import ceil as fine_ceil
+
+from util import get_timestamp_header
 from .util import (ceiling as coarse_ceil,
                    map_weeks, zip_sets, lbs2kg)
 
@@ -88,6 +90,7 @@ def print_exercise(name, prev_weight, week, unit, increment=5):
     weights = build_sets(prev_weight, week, unit, increment)
     # Output w/ reps
     print('\n<=== Sets (Week {}) ===>'.format(week))
+    print(get_timestamp_header())
     print('{}:'.format(name), zip_sets(weights, week))
 
     if unit == MassUnit.lbs:
