@@ -4,82 +4,80 @@ fto.py
 ===
 Calculator for weights on the 5/3/1 plan by Jim Wendler.
 """
-from enum import Enum
-from math import ceil as fine_ceil
-
 from util import get_timestamp_header
-from .util import (ceiling as coarse_ceil,
-                   map_weeks, zip_sets, lbs2kg)
+from .util import mround, map_weeks, zip_sets, lbs2kg, MassUnit
 
-
-class MassUnit(str, Enum):
-    """Enum for standardizing unit of mass abbreviations."""
-    pounds = 'lbs'
-    lbs = pounds
-    kilograms = 'kgs'
-    kgs = kilograms
 
 weeks = map_weeks()
 
 
-def _get_ceiling(unit=MassUnit.lbs):
-    """Return correct ceiling function by units.
+def get_max_from_previous(prev_weight, curr_week, increment=5,
+                          units=MassUnit.lbs, round=False):
+    """Calculate this mesocycle's top weight by using last week's weight.
 
-    Python's `ceil` function rounds to the nearest integer, while 5/3/1 calls
-    for rounding to the nearest multiple of five. We use the finer-grained
-    :func:`ceil` when in kilograms, since jumps of 1 kg are possible.
+    :param int prev_weight: Top planned weight from previous workout.
+    :param int curr_week: Current week.
+    :param int increment: Amount to auto-increase the max by, if this is the
+    start of a new cycle.
+    :param bool round: Whether or not to round the max to the nearest unit
+    multiple (1 for kilograms, 5 if in pounds).
+    :param units: Pounds or kilograms.
+    :type units: :class:`MassUnit`.
     """
-    return coarse_ceil if unit == MassUnit.lbs else fine_ceil
-
-
-def _get_max_from_previous(prev_weight, curr_week):
-    """Calculate this mesocycle's top weight by using last week's weight."""
-    # Get our maximum weight for this mesocycle (~month)
-    # Do so by dividing last week's weight by last week's percentage
     last_week = curr_week - 1
     # Feeling dumb, so I can't get this modulo to work out right.
     # 3 => 2
     # 2 => 1
     # 1 => 3 (Skips zero)
     prev_week = last_week if last_week != 0 else len(weeks) - 1
+    # Lookup last week's percentage
     max_weight = prev_weight / weeks[prev_week].percent
+    # Increment if this is the start of a new cycle
+    max_weight += increment if curr_week == 1 else 0
+    if round:
+        max_weight = mround(max_weight, units)
     return max_weight
 
 
-def calc_warmup_sets(max_weight, unit=MassUnit.lbs):
+def calc_warmup_sets(max_weight, units=MassUnit.lbs):
     """Return warm-up sets, based on top weight of the day."""
     percents = (0.4, 0.5, 0.6)
-    ceiling_func = _get_ceiling(unit)
-    calc_warmups = lambda percent: ceiling_func(max_weight * percent)
+    calc_warmups = lambda percent: mround(max_weight * percent, units)
     return list(map(calc_warmups, percents))
 
 
-def build_sets(prev_weight, curr_week, unit=MassUnit.lbs, increment=0):
+def build_sets(max_weight, percent, units=MassUnit.lbs):
     """Create sets based off last week's top weight.
 
-    :param int max_weight: Training max weight.
+    :param int prev_weight: Peak *planned weight used during last workout.
     :param float top_percent: Percentage of our one rep max the top working
         set will be calculated at.
     :param str unit: Whether to calculate in lbs or kgs
     """
-    ceiling_func = _get_ceiling(unit)
-    max_weight = _get_max_from_previous(prev_weight, curr_week)
-    # Bump weight if this is the start of a new cycle
-    max_weight += increment if curr_week == 1 else 0
-    # Create warm-up sets
-    sets = calc_warmup_sets(max_weight, unit)
+    sets = calc_warmup_sets(max_weight, units)
 
     for i in (2, 1, 0):
         # Ramp up our percents
-        training_percent = weeks[curr_week].percent - 0.1 * i
-        weight = ceiling_func(max_weight * training_percent)
+        training_percent = percent - 0.1 * i
+        weight = mround(max_weight * training_percent, units)
         sets.append(weight)
-    if unit is MassUnit.kilograms:
+
+    if units is MassUnit.kilograms:
         sets = lbs2kg(sets)
+
     return sets
 
 
-def print_exercise(name, prev_weight, week, unit, increment=5):
+def plan_cycle(max_weight):
+    """Calculate one complete cycle.
+
+    :param int prev_weight: Peak *planned* weight used during last cycle.
+    """
+    return [build_sets(max_weight, weeks[w].percent)
+            for w in range(1, len(weeks))]
+
+
+def print_exercise(name, max_weight, week, increment=5, units=MassUnit.lbs):
     """Build sets for a given exercise.
 
     :param prev_weight: Top working-set weight used last week.
@@ -87,13 +85,14 @@ def print_exercise(name, prev_weight, week, unit, increment=5):
         weights calculated for. Accepts 1-3.
     """
     # Don't forget to add weight if you're calculating off week 3 weight!
-    weights = build_sets(prev_weight, week, unit, increment)
+    weights = build_sets(max_weight, weeks[week].percent, units)
     # Output w/ reps
     print('\n<=== Sets (Week {}) ===>'.format(week))
     print(get_timestamp_header())
+    print('- Training max: {}'.format(max_weight))
     print('{}:'.format(name), zip_sets(weights, week))
 
-    if unit == MassUnit.lbs:
+    if units == MassUnit.lbs:
         print('- In kgs, (-20): {}\n'
               .format(zip_sets(lbs2kg(weights, sub=20), week)))
 

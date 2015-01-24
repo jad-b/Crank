@@ -4,10 +4,16 @@ util.py
 ===
 Utility functions for :module:`fto`.
 """
-import math
 from collections import namedtuple
+from enum import Enum
 
 Week = namedtuple('Week', ['percent', 'reps'])
+
+
+class MassUnit(str, Enum):
+    """Enum for standardizing unit of mass abbreviations."""
+    pounds = lbs = 'lbs'
+    kilograms = kgs = 'kgs'
 
 
 def map_weeks():
@@ -25,15 +31,17 @@ def map_weeks():
 _weeks = map_weeks()
 
 
-def ceiling(f):
-    """Find ceiling of number, a la 5/3/1 method."""
-    # Apply modulus to weight in increments of 5
-    mod = math.fmod(f, 5)
-    # Short heuristic to determine rounding
-    if mod > 2.5:  # round up
-        return math.trunc(f - mod + 5)
-    else:  # round down
-        return math.trunc(f - mod)
+def mround(x, units=MassUnit.lbs):
+    """Find ceiling of number, a la 5/3/1 method.
+
+    Name is taken from the equivalent Google Spreadsheet formula.
+
+    :param int x: Number to round.
+    :para int base: Integer multiple to round to.
+    """
+    base = 1 if units == MassUnit.kgs else 5
+    # Round to 5 lbs if in pounds, else go by 1 kg increments
+    return int(base * round(float(x) / base))
 
 
 def lbs2kg(sets, sub=0):
