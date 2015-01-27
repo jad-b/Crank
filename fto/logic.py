@@ -4,7 +4,7 @@ fto.py
 ===
 Calculator for weights on the 5/3/1 plan by Jim Wendler.
 """
-from util import get_timestamp_header
+from common import get_timestamp_header
 from .util import mround, map_weeks, zip_sets, lbs2kg, MassUnit
 
 

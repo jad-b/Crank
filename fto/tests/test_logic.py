@@ -6,7 +6,7 @@ Tests for the :module:`fto.logic`.
 """
 from unittest import TestCase
 
-from fto import logic, util
+from fto import logic
 
 
 class TestGetMaxFromPrevious(TestCase):
@@ -18,8 +18,8 @@ class TestGetMaxFromPrevious(TestCase):
         Should consistently return the same max weight."""
         for week, w in zip(range(1, len(logic.weeks)), (95, 85, 90)):
                 self.assertEqual(self.max_weight,
-                                 logic.get_max_from_previous(w, week,
-                                     increment=0),
+                                 logic.get_max_from_previous(
+                                     w, week, increment=0),
                                  "week = {}, weight = {}".format(week, w))
 
 
@@ -49,7 +49,6 @@ class TestBuildSets(TestCase):
     def test_build_sets(self):
         """Test basic I/O"""
         max_weight = 100
-        steps = (0.2, 0.1, 0)
 
         res = logic.build_sets(max_weight, logic.weeks[1].percent)[-3:]
         self.assertEqual(res, [65, 75, 85])
@@ -57,4 +56,3 @@ class TestBuildSets(TestCase):
         self.assertEqual(res, [70, 80, 90])
         res = logic.build_sets(max_weight, logic.weeks[3].percent)[-3:]
         self.assertEqual(res, [75, 85, 95])
-

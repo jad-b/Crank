@@ -8,7 +8,7 @@ Progresses in a pyramid-style scheme, where reps and sets are initially added,
 and then consolidated once an arbitrary critical number of total reps have been
 reached.
 """
-from util import get_timestamp_header
+from common import get_timestamp_header
 
 
 class Cranky(object):
