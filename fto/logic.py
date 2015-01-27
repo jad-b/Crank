@@ -49,23 +49,15 @@ def calc_warmup_sets(max_weight, units=MassUnit.lbs):
 def build_sets(max_weight, percent, units=MassUnit.lbs):
     """Create sets based off last week's top weight.
 
-    :param int prev_weight: Peak *planned weight used during last workout.
-    :param float top_percent: Percentage of our one rep max the top working
+    :param int max_weight: 1RM for the exercise.
+    :param float percent: Percentage of our one rep max the top working
         set will be calculated at.
-    :param str unit: Whether to calculate in lbs or kgs
+    :param str units: Whether to calculate in lbs or kgs.
     """
-    sets = calc_warmup_sets(max_weight, units)
-
-    for i in (2, 1, 0):
-        # Ramp up our percents
-        training_percent = percent - 0.1 * i
-        weight = mround(max_weight * training_percent, units)
-        sets.append(weight)
-
-    if units is MassUnit.kilograms:
-        sets = lbs2kg(sets)
-
-    return sets
+    warm_ups = calc_warmup_sets(max_weight, units)
+    steps = (0.2, 0.1, 0)
+    sets = list(map(lambda x: mround(max_weight * (percent - x)), steps))
+    return warm_ups + sets
 
 
 def plan_cycle(max_weight):
