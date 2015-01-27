@@ -1,0 +1,5 @@
+coverage
+nose
+pep8
+pyflakes
+pylint
