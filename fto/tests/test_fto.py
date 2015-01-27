@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-test_fto.py
-===
-Tests for the :module:`fto.fto`.
+test_logic.py
+===========
+Tests for the :module:`fto.logic`.
 """
 from unittest import TestCase
 
-from .. import fto
+from fto import logic
 
 
 class TestGetMaxFromPrevious(TestCase):
-    max_weight = 100
+    max_weight = 00
 
     def test_returns(self):
         """Test reverse-engineering our max weight.
 
         Should consistently return the same max weight."""
-        for week in len(1, fto.weeks + 1):
+        for week in len(1, logic.weeks + 1):
             for w in (85, 90, 95):
                 self.assertEqual(self.max_weight,
-                                 fto._get_max_from_previous(w, week))
+                                 logic._get_max_from_previous(w, week))
 
 
 class TestCalcWarmupSets(TestCase):
@@ -28,15 +28,15 @@ class TestCalcWarmupSets(TestCase):
     def test_simple_case(self):
         """Test we return warm-up sets at correct percent of max weight."""
         expected = (40, 50, 60)
-        actual = fto.calc_warmup_sets(self.max_weight)
+        actual = logic.calc_warmup_sets(self.max_weight)
         self.assertEqual(actual, expected)
 
     def test_units_are_kgs(self):
         """Test we use the correct ceiling when in kilograms."""
         max_weight = 77
 
-        kgs_actual = fto.calc_warmup_sets(max_weight, unit='kgs')
-        lbs_actual = fto.calc_warmup_sets(max_weight, unit='lbs')
+        kgs_actual = logic.calc_warmup_sets(max_weight, unit='kgs')
+        lbs_actual = logic.calc_warmup_sets(max_weight, unit='lbs')
 
         # Assert we produced a different output, as rough stand-in for
         # testing it was more-granular
@@ -57,7 +57,7 @@ class TestBuildSets(TestCase):
         prev_weight, curr_week = 85, 2
         expected = [self.warm_up + l for l in self.working_sets]
 
-        actual = fto.build_sets(prev_weight, curr_week)
+        actual = logic.build_sets(prev_weight, curr_week)
 
         self.assertEqual(actual, expected)
 
@@ -72,6 +72,6 @@ class TestBuildSets(TestCase):
         prev_weight, curr_week, increment = 95, 1, 5
         expected = self.warm_up + self.working_sets[0]
 
-        actual = fto.build_sets(prev_weight, curr_week, increment=increment)
+        actual = logic.build_sets(prev_weight, curr_week, increment=increment)
 
         self.assertEqual(actual, expected)

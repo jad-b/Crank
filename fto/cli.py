@@ -2,11 +2,11 @@
 """
 cli.py
 ===
-User-facing command-line functions for :module:`fto`.
+User-facing command-line functions for :module:`fto.logic`.
 """
 import string
 
-from fto.fto import print_exercise, MassUnit, get_max_from_previous
+from fto.logic import print_exercise, MassUnit, get_max_from_previous
 
 
 def process_input(units='lbs'):
