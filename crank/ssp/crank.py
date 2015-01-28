@@ -40,7 +40,7 @@ class Cranky(object):
         return True
 
     def crank(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     def __iter__(self):
         while self.crankable():
@@ -89,9 +89,6 @@ class Aggregator(Cranky):
     """Manages the aggregation phase of Crank."""
 
     def __init__(self, day, set_max=10, apex=100, name='', acc=None):
-        if day < apex:
-            return Accumulator(day, set_max, apex, name)
-
         if acc is not None:
             self.build_from_accumulator(acc)
         else:
@@ -108,11 +105,11 @@ class Aggregator(Cranky):
         self.catch_up(apex, day)
 
     def build_from_accumulator(self, acc):
-            self.day = acc.day
-            self.set_max = acc.set_max
-            self.apex = acc.apex
-            self.name = acc.name
-            self.sets = acc.sets
+        self.day = acc.day
+        self.set_max = acc.set_max
+        self.apex = acc.apex
+        self.name = acc.name
+        self.sets = acc.sets
 
     def catch_up(self, curr, final):
         """Crank down to the current day's reps."""

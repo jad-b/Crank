@@ -18,9 +18,9 @@ def process_input(units='lbs'):
     week = int(input("Enter current training week: "))
 
     if week == 1:
-            prev_weight = int(input('Enter previous weight: '))
-            increment = int(input("How much are we adding? "))
-            weight = get_max_from_previous(prev_weight, week, increment, units)
+        prev_weight = int(input('Enter previous weight: '))
+        increment = int(input("How much are we adding? "))
+        weight = get_max_from_previous(prev_weight, week, increment, units)
     else:
         weight = int(input("Enter max weight: "))
         increment = 0
@@ -28,4 +28,4 @@ def process_input(units='lbs'):
     print_exercise(name, weight, week, increment, units)
 
 if __name__ == '__main__':
-            process_input()
+        process_input()
