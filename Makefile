@@ -2,7 +2,7 @@ reqs:
 	pip install -U -r requirements.txt
 
 unit: 
-	nosetests crank/*
+	nosetests --with-coverage crank/*
 
 lint: 
 	pep8 crank/*
