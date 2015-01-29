@@ -26,14 +26,14 @@ class TestAccumulatorCases(TestCase):
             self.compare_sets(input_, output)
 
     def compare_sets(self, inputs, output):
-        acc = Accumulator(*inputs)
+        acc = Accumulator(*inputs, name='Exercise')
         self.assertTupleEqual(acc.sets, output,
                               '{} vs. {}'.format(acc.sets, output))
 
 
 class TestAggregatorCases(TestCase):
     outputs = (
-        (11, 10, 10, 10, 10, 10, 10, 10, 10, 9),
+        [11, 10, 10, 10, 10, 10, 10, 10, 10, 9],
     )
 
     # Corresponding days
@@ -48,31 +48,31 @@ class TestAggregatorCases(TestCase):
 
     def compare_sets(self, inputs, output):
         agg = Aggregator(*inputs)
-        self.assertTupleEqual(agg.sets, output,
+        self.assertListEqual(agg.sets, output,
                               '{} vs. {}'.format(agg.sets, output))
 
 
 class TestIterAggregateCrank(TestCase):
-    aggregate = (
-        (11, 10, 10, 10, 10, 10, 10, 10, 10, 9),    # 101
-        (11, 11, 10, 10, 10, 10, 10, 10, 10, 8),    # 102
-        (11, 11, 11, 10, 10, 10, 10, 10, 10, 7),    # 103
-        (11, 11, 11, 11, 10, 10, 10, 10, 10, 6),    # 104
-        (11, 11, 11, 11, 11, 10, 10, 10, 10, 5),    # 105
-        (11, 11, 11, 11, 11, 11, 10, 10, 10, 4),    # 106
-        (11, 11, 11, 11, 11, 11, 11, 10, 10, 3),    # 107
-        (11, 11, 11, 11, 11, 11, 11, 11, 10, 2),    # 108
-        (11, 11, 11, 11, 11, 11, 11, 11, 11, 1),    # 109
-        (12, 11, 11, 11, 11, 11, 11, 11, 11,),        # 110
-        (12, 12, 11, 11, 11, 11, 11, 11, 10),         # 111
+    aggregates = (
+        [10, 10, 10, 10, 10, 10, 10, 10, 10, 10],   # 100
+        [11, 10, 10, 10, 10, 10, 10, 10, 10, 9],    # 101
+        [11, 11, 10, 10, 10, 10, 10, 10, 10, 8],    # 102
+        [11, 11, 11, 10, 10, 10, 10, 10, 10, 7],    # 103
+        [11, 11, 11, 11, 10, 10, 10, 10, 10, 6],    # 104
+        [11, 11, 11, 11, 11, 10, 10, 10, 10, 5],    # 105
+        [11, 11, 11, 11, 11, 11, 10, 10, 10, 4],    # 106
+        [11, 11, 11, 11, 11, 11, 11, 10, 10, 3],    # 107
+        [11, 11, 11, 11, 11, 11, 11, 11, 10, 2],    # 108
+        [11, 11, 11, 11, 11, 11, 11, 11, 11, 1],    # 109
+        [12, 11, 11, 11, 11, 11, 11, 11, 11,],      # 110
+        [12, 12, 11, 11, 11, 11, 11, 11, 10],       # 111
     )
     day = 100
     set_max = 10
     apex = 100
 
     def test_cases(self):
-        days = range(self.day, (self.day + len(self.aggregate) + 1))
-        io = zip(days, self.aggregate)
-        for day, output in io:
+        days = range(self.day, (self.day + len(self.aggregates) + 1))
+        for day, output in zip(days, self.aggregates):
             agg = Aggregator(day, self.set_max, self.apex)
             self.assertListEqual(agg.sets, output)

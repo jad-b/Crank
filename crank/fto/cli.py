@@ -6,7 +6,7 @@ User-facing command-line functions for :module:`fto.logic`.
 """
 import string
 
-from fto.logic import print_exercise, MassUnit, get_max_from_previous
+from .logic import print_exercise, MassUnit, get_max_from_previous
 
 
 def process_input(units='lbs'):
@@ -25,7 +25,7 @@ def process_input(units='lbs'):
         weight = int(input("Enter max weight: "))
         increment = 0
 
-    print_exercise(name, weight, week, increment, units)
+    print_exercise(name, weight, week, units)
 
 if __name__ == '__main__':
         process_input()

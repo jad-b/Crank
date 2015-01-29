@@ -1,6 +1,8 @@
 reqs:
 	pip install -U -r requirements.txt
 
+test: unit
+
 unit: 
 	nosetests --with-coverage crank/*
 
