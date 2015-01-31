@@ -8,7 +8,7 @@ Progresses in a pyramid-style scheme, where reps and sets are initially added,
 and then consolidated once an arbitrary critical number of total reps have been
 reached.
 """
-from common import get_timestamp_header
+from crank.common import get_timestamp_header
 
 
 class Cranky(object):
@@ -55,7 +55,7 @@ class Cranky(object):
         header = get_timestamp_header()
         sets = ', '.join(('{} ({})'.format(x, y) for x, y in
                           self.setify(self.sets)))
-        return '{header}\n{sets}'.format(header=header, sets=sets)
+        return '{header}\n{day}\n{sets}'.format(header=header, day=self.day, sets=sets)
 
 
 class Accumulator(Cranky):
@@ -92,7 +92,8 @@ class Aggregator(Cranky):
         if acc is not None:
             self.build_from_accumulator(acc)
         else:
-            self.day = day
+            # Start at apex, let catch_up work its way up
+            self.day = apex
             self.set_max = set_max
             self.apex = apex
             self.name = name
@@ -118,7 +119,9 @@ class Aggregator(Cranky):
             curr += 1
 
     def crank(self):
+        # Return first set if we've hit our target
         if self.day == self.sets[0]:
+            assert self.sets[0] == self.apex
             return self.sets
 
         # Subtract one off the end
@@ -132,6 +135,9 @@ class Aggregator(Cranky):
 
         # Update index
         self.index = (self.index + 1) % len(self.sets[:-1])
+
+        # Update day
+        self.day += 1
 
         print(self.sets, self.index)
         return self.sets
