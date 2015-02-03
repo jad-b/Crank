@@ -3,8 +3,6 @@ from setuptools import setup
 import io
 import os
 
-import crank
-
 here = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -39,7 +37,7 @@ setup(
     description='Automate your workout',
     entry_points={
         'console_scripts': [
-            'fto=crank.fto.cli'
+            'fto=crank.fto.cli:process_input'
         ]
     },
     extras_require={
