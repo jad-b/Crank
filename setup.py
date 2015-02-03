@@ -1,14 +1,17 @@
 
-from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
+from setuptools import setup
 import io
-import codecs
 import os
-import sys
 
 import crank
 
 here = os.path.abspath(os.path.dirname(__file__))
+
+
+def read_version(filename='VERSION'):
+    with open(filename) as v_file:
+        return v_file.read().strip()
+
 
 def read(*filenames, **kwargs):
     encoding = kwargs.get('encoding', 'utf-8')
@@ -19,38 +22,39 @@ def read(*filenames, **kwargs):
             buf.append(f.read())
     return sep.join(buf)
 
-long_description = read('README.md')
-
 setup(
-    name='crank',
-    version=crank.__version__,
-    url='http://github.com/jad-b/crank/',
-    license='Apache Software License',
     author='Jeremy Dobbins-Bucklad',
-    tests_require=['nose'],
-    install_requires=[],
-    # cmdclass={'test': PyTest},
     author_email='j.american.db@gmail.com',
-    description='Automate your workout',
-    long_description=long_description,
-    packages=['crank'],
-    include_package_data=True,
-    platforms='any',
-    test_suite='crank.test.test_crank',
-    classifiers = [
-        'Programming Language :: Python',
+    classifiers=[
+        # 'License :: OSI Approved :: MIT',
         'Development Status :: 4 - Beta',
-        'Natural Language :: English',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
+        'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        ],
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
+    description='Automate your workout',
+    entry_points={
+        'console_scripts': [
+            'fto=crank.fto.cli'
+        ]
+    },
     extras_require={
         'testing': ['nose', 'coverage'],
-    }
+    },
+    include_package_data=True,
+    install_requires=[],
+    keywords='workout automation',
+    license='MIT',
+    long_description=read('README.rst'),
+    name='crank',
+    packages=['crank'],
+    platforms='any',
+    test_suite='crank.test.test_crank',
+    tests_require=['nose'],
+    url='http://github.com/jad-b/crank',
+    version=read_version()
 )
-
