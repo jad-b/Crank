@@ -69,7 +69,7 @@ def kgs2lbs(sets, sub=0):
 def one_rep(weight, week=1, inc=5):
     """Calculate one rep max from week's percentage."""
     percents = (0.85, 0.9, 0.95)
-    percent = percents[week]
+    percent = percents[week-1]
     return weight / percent + inc if week == 3 else 0
 
 
