@@ -1,4 +1,4 @@
-
+import subprocess
 from setuptools import setup
 import io
 import os
@@ -7,8 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 
 def read_version(filename='VERSION'):
-    with open(filename) as v_file:
-        return v_file.read().strip()
+    subprocess.check_output(['git', 'describe', '--abbrev=0', '--tags'])
 
 
 def read(*filenames, **kwargs):
