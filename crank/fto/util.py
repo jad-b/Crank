@@ -82,3 +82,8 @@ def zip_sets(weights, week=1):
     for s in sets:
         output += ' {} x {},'.format(s[0], s[1])
     return output.rstrip(', ')
+
+def max_calculator(weight, reps, units=MassUnit.lbs):
+    """Calculatr a 1RM using Jim Wendler's 5/3/1 formula; (weight*reps*0.0333)
+    + weight."""
+    return mround(weight * reps * 0.0333 + weight, units)
