@@ -23,11 +23,12 @@ def read_until_valid(prompt, valid_inputs=None, lmbda=None):
     """
     while True:
         user_input = input(prompt).strip(string.whitespace)
+        # Apply a given function
         if lmbda is not None:
             try:
                 user_input = lmbda(user_input)
-            except:
-                continue
+            except:         # Any errors are assumed to be bad input
+                continue    # So keep trying
         if valid_inputs is not None:
             if user_input in valid_inputs:
                 return user_input

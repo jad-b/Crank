@@ -85,8 +85,8 @@ def print_exercise(name, max_weight, week, units=MassUnit.lbs):
     print('{}:'.format(name), zip_sets(weights, week))
 
     if units == MassUnit.lbs:
-        print('- In kgs, (-20): {}\n'
-              .format(zip_sets(lbs2kg(weights, sub=20), week)))
+        print('- kg: {}\n'
+              .format(zip_sets(lbs2kg(weights), week)))
 
 
 if __name__ == "__main__":
