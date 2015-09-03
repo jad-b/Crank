@@ -86,7 +86,7 @@ def print_exercise(name, max_weight, week, units=MassUnit.lbs):
 
     if units == MassUnit.lbs:   # Print weight in kilograms, for Dyn's gym
         print('- unit: kg: {}\n'.format(zip_sets(lbs2kg(weights), week)))
-    else    # Print '- unit: kg' for clarity of records
+    else:    # Print '- unit: kg' for clarity of records
         print('- unit: kg\n')
 
 
