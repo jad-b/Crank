@@ -49,6 +49,8 @@ def calc_warmup_sets(max_weight, units=MassUnit.lbs):
 def build_sets(max_weight, percent, units=MassUnit.lbs):
     """Create sets based off last week's top weight.
 
+    Always calculate in pounds, then convert to the appropriate unit.
+
     :param int max_weight: 1RM for the exercise.
     :param float percent: Percentage of our one rep max the top working
         set will be calculated at.
@@ -57,6 +59,8 @@ def build_sets(max_weight, percent, units=MassUnit.lbs):
     warm_ups = calc_warmup_sets(max_weight, units)
     steps = (0.2, 0.1, 0)
     sets = list(map(lambda x: mround(max_weight * (percent - x)), steps))
+    if units == MassUnit.kilograms:
+        return lbs2kg(warm_ups + sets)
     return warm_ups + sets
 
 
@@ -81,8 +85,8 @@ def print_exercise(name, max_weight, week, units=MassUnit.lbs):
     # Output w/ reps
     print('\n<=== Sets (Week {}) ===>'.format(week))
     print(get_timestamp_header())
-    print('- Training max: {}'.format(max_weight))
     print('{}:'.format(name), zip_sets(weights, week))
+    print('- Training max: {} {}'.format(max_weight, MassUnit.lbs.value))
 
     if units == MassUnit.lbs:   # Print weight in kilograms, for Dyn's gym
         print('- unit: kg: {}\n'.format(zip_sets(lbs2kg(weights), week)))
