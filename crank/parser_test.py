@@ -1,20 +1,27 @@
 import unittest
+import os
 
 import parser
 
 
-def load_squat_data():
-    with open('squat.txt') as fp:
-        return fp.read()
+_test_data = os.path.join(os.path.dirname(__file__), 'squat.txt')
 
 
 class TestParsing(unittest.TestCase):
 
     def test_workout_splitting(self):
-        squats = load_squat_data()
-        gen = parser.read_until_blankline(squats)
-        wkts = list(gen)
+        stream = parser.stream_blocks(_test_data)
+        wkts = []
+        try:
+            for i, wkt in parser.parse_workouts(stream):
+                wkts.append((i, wkt))
+        except:
+            print('{:d} workouts parsed'.format(len(wkts)))
+            raise
         self.assertEqual(len(wkts), 44)
+
+    def test_workout_parsing(self):
+        pass
 
 
 if __name__ == '__main__':
