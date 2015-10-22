@@ -3,13 +3,11 @@ reqs:
 
 test: unit
 
-unit: 
+unit:
 	nosetests --with-coverage crank/*
 
-lint: 
-	pep8 crank/*
-	pyflakes crank/*
+lint:
+	flake8 $(shell find . -name '*.py' -type f)
 
 clean:
-	find . -name '*.orig' -delete
-	find . -name '*.swp' -delete
+	find . -name '*.orig' -o -name '*.swp' -delete

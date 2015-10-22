@@ -36,8 +36,7 @@ def parse_workout(lines):
     wkt['timestamp'] = parse_timestamp(lines[0])
     lines = lines[1:]
     # Tags
-    if lines[0].startswith('-'):
-        wkt['tags'], lines = parse_tags(lines)
+    wkt['tags'], lines = parse_tags(lines)
     # Exercises
     wkt['exercises'] = exs = []
     while len(lines) > 0:
@@ -60,11 +59,10 @@ def parse_timestamp(line):
 def parse_exercise(lines):
     logger.debug("Exercise: %s", lines)
     logger.debug("Before: %s", lines[0])
-    try:
-        name, sets = lines[0].split(':')
-    except:
-        name, sets = ParseError('Exercise: {}'.format(lines[0]), parse_exercise), ''
+    # Exercise name & sets
+    name, sets = parse_exercise_name(lines[0])
     logger.info('Name: %s, Sets: %s', name, sets)
+    # Tags
     if len(lines) > 1:
         tags, lines = parse_tags(lines[1:])
     else:
@@ -73,14 +71,18 @@ def parse_exercise(lines):
     return name, sets, tags, lines
 
 
+def parse_exercise_name(line):
+    try:
+        return lines[0].split(':')
+    except:
+        return ParseError('Exercise: {}'.format(lines[0]), parse_exercise), ''
+
+
 def parse_tags(lines):
     tags = {}
     for i, line in enumerate(lines):
         if line.startswith('-'):
-            try:
-                parts = line.lstrip('- ').split(':')
-            except:
-                parts = ParseError('Tag: {}'.format(line), parse_tag)
+            parts = parse_tag(line)
             if len(parts) == 1:
                 tags['comment'] = parts[0]
             else:
@@ -89,6 +91,13 @@ def parse_tags(lines):
             break
     logger.debug("Tags: %s", tags)
     return tags, lines[len(tags):]
+
+
+def parse_tag(line)
+    try:
+        return line.lstrip('- ').split(':')
+    except:
+        return ParseError('Tag: {}'.format(line), parse_tag)
 
 
 def stream_blocks(filename):
