@@ -16,9 +16,15 @@ sh.setFormatter(log_fmt)
 logger.addHandler(sh)
 
 
+class ParseError(Exception):
+    def __init__(self, message, callback):
+        super().__init__(message)
+        self.callback = callback
+
+
 def parse_workouts(wkt_src):
     with launch_ipdb_on_exception():
-        return enumerate((parse_workout(wkt) for wkt in wkt_src))
+        return (parse_workout(wkt) for wkt in wkt_src)
 
 
 def parse_workout(lines):
@@ -26,10 +32,13 @@ def parse_workout(lines):
     if len(lines) == 0:
         return wkt
     logger.debug('%s', pformat(lines))
+    # Timestamp
     wkt['timestamp'] = parse_timestamp(lines[0])
     lines = lines[1:]
-    if lines[1].startswith('-'):
-        wkt['tags'], lines = parse_tags(lines[1:])
+    # Tags
+    if lines[0].startswith('-'):
+        wkt['tags'], lines = parse_tags(lines)
+    # Exercises
     wkt['exercises'] = exs = []
     while len(lines) > 0:
         ex, sets, tags, lines = parse_exercise(lines)
@@ -40,7 +49,10 @@ def parse_workout(lines):
 def parse_timestamp(line):
     logger.debug(line)
     ts_format = '%Y %b %d @ %H%M'
-    ts = datetime.strptime(line, ts_format)
+    try:
+        ts = datetime.strptime(line, ts_format)
+    except:
+        return ParseError('Timestamp: {}'.format(line), parse_timestamp)
     logger.info(ts)
     return ts
 
@@ -48,7 +60,10 @@ def parse_timestamp(line):
 def parse_exercise(lines):
     logger.debug("Exercise: %s", lines)
     logger.debug("Before: %s", lines[0])
-    name, sets = lines[0].split(':')
+    try:
+        name, sets = lines[0].split(':')
+    except:
+        name, sets = ParseError('Exercise: {}'.format(lines[0]), parse_exercise), ''
     logger.info('Name: %s, Sets: %s', name, sets)
     if len(lines) > 1:
         tags, lines = parse_tags(lines[1:])
@@ -62,7 +77,10 @@ def parse_tags(lines):
     tags = {}
     for i, line in enumerate(lines):
         if line.startswith('-'):
-            parts = line.lstrip('- ').split(':')
+            try:
+                parts = line.lstrip('- ').split(':')
+            except:
+                parts = ParseError('Tag: {}'.format(line), parse_tag)
             if len(parts) == 1:
                 tags['comment'] = parts[0]
             else:
@@ -88,8 +106,29 @@ def buffer_blocks(source):
     for line in source:
         if line == '\n':
             # Return copy of buffer
-            yield list(bfr)
-            bfr.clear()
+            if bfr: # But only if there's something there
+                yield list(bfr)
+                bfr.clear()
         else:
             bfr.append(line.strip())
     yield bfr
+
+
+def dfs(nest, fn):
+    for i in nest:
+        # Keep recurring
+        if isinstance(i, list) or isinstance(i, dict):
+            dfs(i, fn)
+        # not a list or dict; evaluate for error
+        else:
+            if isinstance(nest[i], ParseError):
+                nest[i] = resolve_error(nest[i])
+
+
+def resolve_error(err):
+    print(err.args[0])
+    redo = input('Please enter the corrected value: ').strip()
+    done = 'no'
+    while done not in ('y', 'yes'):
+        done = input('Does this look right? {}'.format(redo))
+    return redo

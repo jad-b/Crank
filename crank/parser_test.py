@@ -13,8 +13,8 @@ class TestParsing(unittest.TestCase):
         stream = parser.stream_blocks(_test_data)
         wkts = []
         try:
-            for i, wkt in parser.parse_workouts(stream):
-                wkts.append((i, wkt))
+            for wkt in parser.parse_workouts(stream):
+                wkts.append(wkt)
         except:
             print('{:d} workouts parsed'.format(len(wkts)))
             raise
