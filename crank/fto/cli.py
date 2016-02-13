@@ -6,7 +6,7 @@ User-facing command-line functions for :module:`fto.logic`.
 """
 import string
 
-from .logic import print_exercise, MassUnit, get_max_from_previous
+from .logic import print_exercise, MassUnit
 
 
 def read_until_valid(prompt, valid_inputs=None, lmbda=None):
@@ -36,23 +36,20 @@ def read_until_valid(prompt, valid_inputs=None, lmbda=None):
             return user_input
 
 
-
 def process_input(units='lbs'):
     """Guide user through weight calculations via CLI prompts."""
     name = read_until_valid("Please enter the exercise name: ",
-            lmbda=lambda x: x.capitalize())
+                            lmbda=lambda x: x.capitalize())
     kgs = read_until_valid("Kilograms? y/n: ", ('y', 'n'))
     week = read_until_valid("Enter current training week: ", lmbda=int)
     weight = read_until_valid("Enter max weight: ", lmbda=int)
-
-    units = MassUnit.kgs if kgs == 'y' else MassUnit.lbs
+    units = MassUnit.kilograms if kgs == 'y' else MassUnit.lbs
     if week == 1:
         increment = read_until_valid("How much are we adding? ", lmbda=int)
         weight += increment
-    else:
-        increment = 0
 
     print_exercise(name, weight, week, units)
+
 
 if __name__ == '__main__':
         process_input()

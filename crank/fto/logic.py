@@ -5,7 +5,7 @@ fto.py
 Calculator for weights on the 5/3/1 plan by Jim Wendler.
 """
 from crank.common import get_timestamp_header
-from .util import mround, map_weeks, zip_sets, lbs2kg, MassUnit
+from .util import mround, map_weeks, zip_sets, MassUnit
 
 
 weeks = map_weeks()
@@ -62,8 +62,6 @@ def build_sets(max_weight, percent, units=MassUnit.lbs):
     warm_ups = calc_warmup_sets(max_weight, units)
     steps = (0.2, 0.1, 0)
     sets = list(map(lambda x: mround(max_weight * (percent - x)), steps))
-    if units == MassUnit.kilograms:
-        return lbs2kg(warm_ups + sets)
     return warm_ups + sets
 
 
@@ -83,18 +81,11 @@ def print_exercise(name, max_weight, week, units=MassUnit.lbs):
     :param int week: Which week you're currently on; the week you want the
         weights calculated for. Accepts 1-3.
     """
-    # Don't forget to add weight if you're calculating off week 3 weight!
     weights = build_sets(max_weight, weeks[week].percent, units)
-    # Output w/ reps
-    print('\n<=== Sets (Week {}) ===>'.format(week))
+    print('\n')
     print(get_timestamp_header())
     print('{}:'.format(name), zip_sets(weights, week))
-    print('- Training max: {} {}'.format(max_weight, MassUnit.lbs.value))
-
-    if units == MassUnit.lbs:   # Print weight in kilograms, for Dyn's gym
-        print('- unit: kg: {}'.format(zip_sets(lbs2kg(weights), week)))
-    else:    # Print '- unit: kg' for clarity of records
-        print('- unit: kg')
+    print('- Training max: {} {}'.format(max_weight, units.value))
     print('- week: {}'.format(week))
     print('\n')
 
