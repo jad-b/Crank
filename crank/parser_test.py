@@ -23,6 +23,15 @@ class TestParsing(unittest.TestCase):
     def test_workout_parsing(self):
         pass
 
+    def test_split_iter(self):
+        ex1 = """This is a string.
+            For which I don't really care.
+            But here it is.
+            So what you gonna do?"""
+        io = ((ex1, ex1.split('\n')),)
+        for test_in, test_out in io:
+            self.assertEqual(test_out, list(parser.split_iter(test_in)))
+
 
 if __name__ == '__main__':
     unittest.main()

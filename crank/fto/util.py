@@ -51,8 +51,7 @@ def lbs2kg(sets, sub=0):
     :param int sub: Amount to subtract from each converted weight. Useful
     for when taking into account bar weight.
     """
-    lb_kg = lambda w: int(round(w / 2.20462) - sub)
-    return (lb_kg(x) for x in sets)
+    return (int(round(x / 2.20462) - sub) for x in sets)
 
 
 def kgs2lbs(sets, sub=0):
@@ -62,8 +61,7 @@ def kgs2lbs(sets, sub=0):
     :param int sub: Amount to subtract from each converted weight. Useful
     for when taking into account bar weight.
     """
-    kg_lb = lambda w: int(round(w * 2.20462) - sub)
-    return (kg_lb(x) for x in sets)
+    return (int(round(x * 2.20462) - sub) for x in sets)
 
 
 def one_rep(weight, week=1, inc=5):
@@ -82,6 +80,7 @@ def zip_sets(weights, week=1):
     for s in sets:
         output += ' {} x {},'.format(s[0], s[1])
     return output.rstrip(', ')
+
 
 def max_calculator(weight, reps, units=MassUnit.lbs):
     """Calculatr a 1RM using Jim Wendler's 5/3/1 formula; (weight*reps*0.0333)

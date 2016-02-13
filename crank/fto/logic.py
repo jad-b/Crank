@@ -42,7 +42,10 @@ def get_max_from_previous(prev_weight, curr_week, increment=5,
 def calc_warmup_sets(max_weight, units=MassUnit.lbs):
     """Return warm-up sets, based on top weight of the day."""
     percents = (0.4, 0.5, 0.6)
-    calc_warmups = lambda percent: mround(max_weight * percent, units)
+
+    def calc_warmups(percent):
+        return mround(max_weight * percent, units)
+
     return list(map(calc_warmups, percents))
 
 
@@ -89,9 +92,11 @@ def print_exercise(name, max_weight, week, units=MassUnit.lbs):
     print('- Training max: {} {}'.format(max_weight, MassUnit.lbs.value))
 
     if units == MassUnit.lbs:   # Print weight in kilograms, for Dyn's gym
-        print('- unit: kg: {}\n'.format(zip_sets(lbs2kg(weights), week)))
+        print('- unit: kg: {}'.format(zip_sets(lbs2kg(weights), week)))
     else:    # Print '- unit: kg' for clarity of records
-        print('- unit: kg\n')
+        print('- unit: kg')
+    print('- week: {}'.format(week))
+    print('\n')
 
 
 if __name__ == "__main__":
