@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime
 
-from crank.workout import Workout
+from crank.workouts import Workout
 from crank import test_data
 
 
@@ -15,4 +15,4 @@ class TestWorkout(unittest.TestCase):
         )
         for t_in in test_in:
             wkt = Workout.parse(t_in)
-            self.assertEqual(wkt.timestamp, exp.timestamp)
+            self.assertEqual(wkt, exp)
