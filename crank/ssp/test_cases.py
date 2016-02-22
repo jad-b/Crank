@@ -1,7 +1,7 @@
 from unittest import TestCase
 from itertools import repeat
 
-from crank import Accumulator, Aggregator
+from crank.ssp.crank import Accumulator, Aggregator
 
 
 class TestAccumulatorCases(TestCase):
@@ -49,7 +49,7 @@ class TestAggregatorCases(TestCase):
     def compare_sets(self, inputs, output):
         agg = Aggregator(*inputs)
         self.assertListEqual(agg.sets, output,
-                              '{} vs. {}'.format(agg.sets, output))
+                             '{} vs. {}'.format(agg.sets, output))
 
 
 class TestIterAggregateCrank(TestCase):
@@ -64,7 +64,7 @@ class TestIterAggregateCrank(TestCase):
         [11, 11, 11, 11, 11, 11, 11, 10, 10, 3],    # 107
         [11, 11, 11, 11, 11, 11, 11, 11, 10, 2],    # 108
         [11, 11, 11, 11, 11, 11, 11, 11, 11, 1],    # 109
-        [12, 11, 11, 11, 11, 11, 11, 11, 11,],      # 110
+        [12, 11, 11, 11, 11, 11, 11, 11, 11],      # 110
         [12, 12, 11, 11, 11, 11, 11, 11, 10],       # 111
     )
     day = 100

@@ -5,7 +5,8 @@ test_crank.py
 Unit tests for Crank (tm)
 """
 from unittest import TestCase
-from crank import Accumulator
+
+from crank.ssp.crank import Accumulator
 
 
 class TestAccumulator(TestCase):

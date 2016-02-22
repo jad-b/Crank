@@ -1,7 +1,7 @@
 import logging
 import re
 
-LOGGER = logging.getLOGGER(__name__)
+LOGGER = logging.getLogger(__name__)
 LOGGER.propagate = False
 LOGGER.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
