@@ -6,7 +6,7 @@ User-facing command-line functions for :module:`fto.logic`.
 """
 import string
 
-from .logic import print_exercise, MassUnit
+from crank.fto.logic import print_exercise, MassUnit
 
 
 def read_until_valid(prompt, valid_inputs=None, lmbda=None):
@@ -36,7 +36,7 @@ def read_until_valid(prompt, valid_inputs=None, lmbda=None):
             return user_input
 
 
-def process_input(units='lbs'):
+def process_input():
     """Guide user through weight calculations via CLI prompts."""
     name = read_until_valid("Please enter the exercise name: ",
                             lmbda=lambda x: x.capitalize())

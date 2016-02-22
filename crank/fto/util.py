@@ -40,8 +40,12 @@ def mround(x, units=MassUnit.lbs):
     :para int base: Integer multiple to round to.
     """
     base = 1 if units == MassUnit.kgs else 5
+
     # Round to 5 lbs if in pounds, else go by 1 kg increments
-    return int(base * round(float(x) / base))
+    def ceiling(val):
+        int(base * round(float(val) / base))
+
+    return list(map(ceiling, x))
 
 
 def lbs2kg(sets, sub=0):
