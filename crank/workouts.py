@@ -1,37 +1,47 @@
-import collections
-from datetime import datetime
+from collections.abc import Iterable
+import json
+
+from crank import parser
+# from crank.workout import Workout
+
+from blist import sortedset
 
 
-class Workout:
+class Workouts:
+    """Collection of workouts.
 
-    def __init__(self, timestamp, tags=(), exercises=()):
-        assert isinstance(timestamp, datetime)
-        self.timestamp = timestamp
-        assert isinstance(tags, collections.Iterable)
-        self.tags = tags
-        assert isinstance(exercises, collections.Iterable)
-        self.exercises = exercises
+    Handles storage and search for individual workouts.
+    """
+
+    def __init__(self, filename='workouts.json'):
+        """Initialize with configuration."""
+        self.filename = filename
+        self.workouts = sortedset()
+
+    def load(self):
+        with open(self.filename) as wf:
+            wkts = json.load(wf)
+            self.workouts = sortedset(wkts)
+        assert isinstance(self.workouts, Iterable)
+
+    def save(self):
+        with open(self.filename, 'w') as wf:
+            # Convert sortedset to a list for json encoding
+            json.dump(list(self.workouts), wf)
 
     @classmethod
-    def parse(cls, wkt_data):
-        """Create a Workout instance from a string, or iterable."""
-        if isinstance(wkt_data, str):
-            wkt_data = wkt_data.split('\n')
-        assert isinstance(wkt_data, collections.Iterable)
-        cls._parse_by_item(wkt_data)
+    def from_file(cls, filename):
+        return cls.parse(parser.stream_file(filename))
 
-    def parse_timestamp(self, line):
-        ts_formats = (
-            '%Y %b %d @ %H%M',
-            '%d %b %Y @ %H%M',
-            '%d %B %Y @ %H%M',
-        )
-
-        exc = None
-        for fmt in ts_formats:
-            try:
-                return datetime.strptime(line, fmt)
-            except Exception as e:
-                exc = e
-        else:
-            raise exc
+    @classmethod
+    def parse(cls, wkts):
+        if isinstance(wkts, str):
+            wkts = wkts.split('\n')
+        assert isinstance(wkts, Iterable)
+        if not wkts:
+            raise ValueError("Empty value provided")
+        ws = cls()
+        for wkt_block in parser.buffer_data(wkts):
+            # ws.workouts.add(Workout.parse(wkt_block))
+            ws.workouts.add(wkt_block)
+        return ws

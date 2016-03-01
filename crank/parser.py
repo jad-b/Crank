@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import re
 
@@ -36,12 +37,26 @@ class ParseCallback:
         return "{}: {}".format(self.field, self.value)
 
 
-def string_to_blocks(s):
-    return buffer_blocks(line for line in s.split('\n'))
+def parse_timestamp(line):
+    ts_formats = (
+        '%Y %b %d @ %H%M',
+        '%d %b %Y @ %H%M',
+        '%d %B %Y @ %H%M',
+    )
+
+    for fmt in ts_formats:
+        try:
+            return datetime.strptime(line, fmt)
+        except Exception:
+            pass
+    else:
+        LOGGER.warning("Failed to parse: %s", line)
+        return line
 
 
-def stream_blocks(filename):
-    return buffer_blocks(stream_file(filename))
+def stream_str_blocks(s):
+    """Group a string into a stream of lists by newline."""
+    return buffer_data(line for line in s.split('\n'))
 
 
 def stream_file(filename):
@@ -51,16 +66,18 @@ def stream_file(filename):
             yield line
 
 
-def buffer_blocks(source):
+def buffer_data(source, delim='\n'):
+    """Group data into a stream of lists."""
     bfr = []
     for line in source:
-        if line == '\n' or not line:  # newline or empty string
+        if line == delim or not line:  # newline or empty string
             if bfr:  # if there's something there
                 yield list(bfr)  # Return copy of buffer
                 bfr.clear()
         else:
             bfr.append(line.strip())
-    yield bfr
+    if bfr:
+        yield bfr
 
 
 def split_iter(string, delim_pattern=r"[^\n]"):

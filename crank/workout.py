@@ -1,47 +1,55 @@
-from pprint import pformat
+import collections
+from datetime import datetime
+from collections.abc import Iterable
 
-from crank.parser import LOGGER
-from crank.exercise import parse_exercise
-from crank.tags import parse_tags
+from crank.parser import parse_timestamp
 
 
 class Workout:
 
-    def __init__(self, timestamp=None, *exercises):
+    def __init__(self,
+                 timestamp: datetime,
+                 tags=(),
+                 exercises=(),
+                 raw=None) -> None:
+        """Initialize the Workout with given values.
+
+        :attr str or list raw: Unprocessed data.
+        """
         self.timestamp = timestamp
+        assert isinstance(tags, Iterable)
+        self.tags = tags
+        assert isinstance(exercises, Iterable)
         self.exercises = exercises
+        self.raw = None
 
+    @classmethod
+    def parse(cls, wkt_data):
+        """Create a Workout instance from a string, or iterable."""
+        if isinstance(wkt_data, str):
+            wkt_data = wkt_data.split('\n')
+        assert isinstance(wkt_data, collections.Iterable)
+        if not wkt_data:
+            raise ValueError("Empty value provided")
+        # Timestamp
+        timestamp = parse_timestamp(wkt_data[0])
+        # lines = lines[1:]
+        # Tags
+        # wkt['tags'], lines = parse_tags(lines)
+        # Exercises
+        # wkt['exercises'] = exs = []
+        # while len(lines) > 0:
+        # ex, lines = Exercise.parse(lines)
+        # exs.append(ex)
+        return Workout(timestamp, raw=wkt_data[1:])
 
-def parse_workout(lines):
-    wkt = {}
-    if len(lines) == 0:
-        return wkt
-    LOGGER.debug('%s', pformat(lines))
-    # Timestamp
-    timestamp = parse_timestamp(lines[0])
-    lines = lines[1:]
-    # Tags
-    wkt['tags'], lines = parse_tags(lines)
-    # Exercises
-    wkt['exercises'] = exs = []
-    while len(lines) > 0:
-        ex, lines = Exercise.parse(lines)
-        exs.append(ex)
-    return {timestamp.isoformat(): wkt}
+    def to_dict(self):
+        return {
+            'timestamp': self.timestamp.isoformat(),
+            'raw': self.raw
+        }
 
-
-def parse_timestamp(line):
-    LOGGER.debug(line)
-    ts_formats = (
-        '%Y %b %d @ %H%M',
-        '%d %b %Y @ %H%M',
-        '%d %B %Y @ %H%M',
-    )
-
-    for fmt in ts_formats:
-        try:
-            return datetime.strptime(line, fmt)
-        except:
-            pass
-    else:
-        return ParseCallback('Timestamp', line, parse_timestamp)
+    def __lt__(self, other):
+        if not isinstance(other, Workout):
+            return NotImplemented
+        return self.timestamp < other.timestamp
