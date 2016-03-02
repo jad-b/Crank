@@ -13,22 +13,16 @@ class Workouts:
 
     Handles storage and search for individual workouts.
     """
+    default_file = 'workouts.json'
 
-    def __init__(self, filename='workouts.json'):
+    def __init__(self, filename=default_file):
         """Initialize with configuration."""
         self.filename = filename
         self.workouts = sortedset()
 
-    def load(self):
-        with open(self.filename) as wf:
-            wkts = json.load(wf)
-            self.workouts = sortedset(wkts)
-        assert isinstance(self.workouts, Iterable)
-
     def save(self):
         with open(self.filename, 'w') as wf:
-            # Convert sortedset to a list for json encoding
-            json.dump(list(self.workouts), wf, indent='\t')
+            json.dump(self, wf, cls=WorkoutsJSONEncoder)
 
     def upgrade(self):
         """Upgrade workouts to a new syntax."""
@@ -38,11 +32,8 @@ class Workouts:
                 w[0] = read_until_valid(prompt, lmbda=parser.parse_timestamp)
 
     @classmethod
-    def from_file(cls, filename):
-        return cls.parse(parser.stream_file(filename))
-
-    @classmethod
     def from_dict(cls, json_object):
+        """Create Workouts from a dict."""
         wkts = cls()
         if 'filename' in json_object:
             wkts.filename = json_object['filename']
@@ -50,7 +41,21 @@ class Workouts:
         return wkts
 
     @classmethod
+    def load(cls, filename=default_file):
+        """Load Workouts from file."""
+        with open(filename) as wf:
+            wkts = json.load(wf, object_hook=Workouts.from_dict)
+        assert isinstance(wkts.workouts, Iterable)
+        return wkts
+
+    @classmethod
+    def parse_wkt(cls, filename):
+        """Parse a .wkt file."""
+        return cls.parse(parser.stream_file(filename))
+
+    @classmethod
     def parse(cls, wkts):
+        """Parse Workouts from a string or list of strings."""
         if isinstance(wkts, str):
             wkts = wkts.split('\n')
         assert isinstance(wkts, Iterable)
@@ -68,5 +73,7 @@ class WorkoutsJSONEncoder(json.JSONEncoder):
     def default(self, o):
         return {
             'filename': o.filename,
+            # Convert sortedset to a list for json encoding
+            # 'workouts': [w.to_json() for w in o.workouts]
             'workouts': list(o.workouts)
         }
