@@ -39,11 +39,11 @@ def mround(x, units=MassUnit.lbs):
     :param int x: Number to round.
     :para int base: Integer multiple to round to.
     """
-    base = 1 if units == MassUnit.kgs else 5
+    base = 5 if units == MassUnit.lbs else 1
 
     # Round to 5 lbs if in pounds, else go by 1 kg increments
     def ceiling(val):
-        int(base * round(float(val) / base))
+        return int(base * round(float(val) / base))
 
     return list(map(ceiling, x))
 
@@ -87,6 +87,11 @@ def zip_sets(weights, week=1):
 
 
 def max_calculator(weight, reps, units=MassUnit.lbs):
-    """Calculatr a 1RM using Jim Wendler's 5/3/1 formula; (weight*reps*0.0333)
-    + weight."""
-    return mround(weight * reps * 0.0333 + weight, units)
+    """Calculatr a 1RM using Jim Wendler's 5/3/1 formula:
+
+        (weight*reps*0.0333) + weight
+    """
+    Maxes = namedtuple('Maxes', ['competition', 'training'])
+    competition_max = mround([weight * reps * 0.0333 + weight], units)[0]
+    training_max = mround([competition_max * .9], units)[0]
+    return Maxes(competition_max, training_max)

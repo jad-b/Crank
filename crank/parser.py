@@ -44,14 +44,15 @@ def parse_timestamp(line):
         '%d %B %Y @ %H%M',
     )
 
+    exc = None
     for fmt in ts_formats:
         try:
             return datetime.strptime(line, fmt)
-        except Exception:
-            pass
+        except Exception as e:
+            exc = e
     else:
         LOGGER.warning("Failed to parse: %s", line)
-        return line
+        raise exc
 
 
 def stream_str_blocks(s):

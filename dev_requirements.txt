@@ -1,3 +1,7 @@
 -r requirements.txt
 
-ipython >= 2.3.0
+coverage
+flake8
+ipython
+pdbpp==0.8.1
+pytest

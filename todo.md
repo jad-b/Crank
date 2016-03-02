@@ -3,10 +3,11 @@
     * [ ] Create Dockerfile
     * [ ] Fix Wercker job
 * [ ] Parse workouts from .wkt format
-    * [ ] Stream lines from a file
-    * [ ] Parse string & list of strings into Workout object
-    * [ ] Output as JSON
+    * [x] Stream lines from a file
+    * [x] Save & load JSON
+        * [x] Custom JSON encoding
 * [ ] Parse Exercises
+    * [ ] Parse string & list of strings into Workout object
     * [ ] Parse exercises from string or list of strings
     * [ ] Output as JSON
 * [ ] Parse Sets

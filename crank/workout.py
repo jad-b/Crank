@@ -3,6 +3,7 @@ from datetime import datetime
 from collections.abc import Iterable
 
 from crank.parser import parse_timestamp
+from crank.fto.cli import read_until_valid
 
 
 class Workout:
@@ -32,7 +33,10 @@ class Workout:
         if not wkt_data:
             raise ValueError("Empty value provided")
         # Timestamp
-        timestamp = parse_timestamp(wkt_data[0])
+        try:
+            timestamp = parse_timestamp(wkt_data[0])
+        except:
+            timestamp = wkt_data[0]
         # lines = lines[1:]
         # Tags
         # wkt['tags'], lines = parse_tags(lines)
@@ -42,6 +46,11 @@ class Workout:
         # ex, lines = Exercise.parse(lines)
         # exs.append(ex)
         return Workout(timestamp, raw=wkt_data[1:])
+
+    def upgrade(self):
+        if not isinstance(self.timestamp, datetime):
+            prompt = '{}: '.format(self.timestamp)
+            self.timestamp = read_until_valid(prompt, lmbda=parse_timestamp)
 
     def to_dict(self):
         return {

@@ -1,8 +1,9 @@
-from collections.abc import Iterable
 import json
+from collections.abc import Iterable
+from datetime import datetime
 
 from crank import parser
-# from crank.workout import Workout
+from crank.fto.cli import read_until_valid
 
 from blist import sortedset
 
@@ -27,11 +28,26 @@ class Workouts:
     def save(self):
         with open(self.filename, 'w') as wf:
             # Convert sortedset to a list for json encoding
-            json.dump(list(self.workouts), wf)
+            json.dump(list(self.workouts), wf, indent='\t')
+
+    def upgrade(self):
+        """Upgrade workouts to a new syntax."""
+        for w in self.workouts:
+            if not isinstance(w[0], datetime):
+                prompt = '{}: '.format(w[0])
+                w[0] = read_until_valid(prompt, lmbda=parser.parse_timestamp)
 
     @classmethod
     def from_file(cls, filename):
         return cls.parse(parser.stream_file(filename))
+
+    @classmethod
+    def from_dict(cls, json_object):
+        wkts = cls()
+        if 'filename' in json_object:
+            wkts.filename = json_object['filename']
+        wkts.workouts = sortedset(json_object.get('workouts'))
+        return wkts
 
     @classmethod
     def parse(cls, wkts):
@@ -45,3 +61,12 @@ class Workouts:
             # ws.workouts.add(Workout.parse(wkt_block))
             ws.workouts.add(wkt_block)
         return ws
+
+
+class WorkoutsJSONEncoder(json.JSONEncoder):
+
+    def default(self, o):
+        return {
+            'filename': o.filename,
+            'workouts': list(o.workouts)
+        }
