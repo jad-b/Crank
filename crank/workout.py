@@ -17,11 +17,18 @@ class Workout:
 
         :attr str or list raw: Unprocessed data.
         """
+        if isinstance(timestamp, str):
+            try:
+                timestamp = parse_timestamp(timestamp)
+            except:
+                pass
         self.timestamp = timestamp
+
         assert isinstance(tags, Iterable)
         self.tags = tags
         assert isinstance(exercises, Iterable)
         self.exercises = exercises
+
         self.raw = raw
 
     @classmethod
@@ -53,12 +60,26 @@ class Workout:
             self.timestamp = read_until_valid(prompt, lmbda=parse_timestamp)
 
     def to_dict(self):
-        return {
-            'timestamp': self.timestamp.isoformat(),
+        d = {
             'raw': self.raw
         }
+        if isinstance(self.timestamp, datetime):
+            d['timestamp'] = self.timestamp.isoformat()
+        else:  # Better be a string; what kind of timestamps are you storing?
+            d['timestamp'] = self.timestamp
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(timestamp=d['timestamp'],
+                   raw=d['raw'])
 
     def __lt__(self, other):
         if not isinstance(other, Workout):
             return NotImplemented
         return self.timestamp < other.timestamp
+
+    def __eq__(self, other):
+        if not isinstance(other, Workout):
+            return NotImplemented
+        return self.timestamp == other.timestamp

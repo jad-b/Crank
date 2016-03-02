@@ -1,5 +1,7 @@
+blist
 coverage
 flake8
 ipython
 pdbpp==0.8.1
 pytest
+python-dateutil

@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+  fto:
+    build: .
+    volumes:
+      - ./:/src
+    working_dir: /src
+    command: sh -c 'python setup.py install; fto'
+
+  unittest:
+    build: .
+    volumes:
+      - ./:/src
+    working_dir: /src
+    command: py.test
+

@@ -2,6 +2,8 @@ from datetime import datetime
 import logging
 import re
 
+import dateutil.parser
+
 LOGGER = logging.getLogger(__name__)
 LOGGER.propagate = False
 LOGGER.setLevel(logging.DEBUG)
@@ -46,6 +48,11 @@ def parse_timestamp(line):
         '%d%b%Y @ %H%M',
     )
 
+    # Try ISO8601
+    try:
+        return dateutil.parser.parse(line)
+    except:
+        pass
     exc = None
     for fmt in ts_formats:
         try:
@@ -83,7 +90,7 @@ def buffer_data(source, delim='\n'):
         yield bfr
 
 
-def split_iter(string, delim_pattern=r"[^\n]"):
+def split_iter(string, delim_pattern=r"[^\n]+"):
     return (x.group(0) for x in re.finditer(delim_pattern, string))
 
 

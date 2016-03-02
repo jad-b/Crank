@@ -3,12 +3,12 @@
     * [x] Save & load JSON
         * [x] Custom JSON encoding
     * [ ] Sort Workouts by timestamp
-        * [ ] Convert Workout timestamp to string
-        * [ ] Process timestamps in Workouts.upgrade()
-* [ ] CI
-    * [ ] Remove TravisCI job
-    * [ ] Create Dockerfile
-    * [ ] Fix Wercker job
+        * [x] Serialize Workout timestamp to string
+        * [x] Process timestamps in Workouts.upgrade()
+* [x] CI
+    * [x] Remove TravisCI job
+    * [x] Create Dockerfile
+    * [x] Fix Wercker job
 * [ ] Parse Exercises
     * [ ] Parse string & list of strings into Workout object
     * [ ] Parse exercises from string or list of strings
