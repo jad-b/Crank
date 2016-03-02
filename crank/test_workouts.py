@@ -1,7 +1,7 @@
 import json
 import os
 
-from blist import sortedset
+from blist import blist
 
 from crank.workouts import Workouts, WorkoutsJSONEncoder
 
@@ -22,7 +22,7 @@ def test_workouts_storage():
 
     wkts2 = Workouts.load(wkts_filename)
     assert len(wkts2.workouts) == 43, wkts2.workouts
-    assert isinstance(wkts2.workouts, sortedset)
+    assert isinstance(wkts2.workouts, blist)
 
 
 def test_workouts_encoding():

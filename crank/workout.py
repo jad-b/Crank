@@ -9,7 +9,7 @@ from crank.fto.cli import read_until_valid
 class Workout:
 
     def __init__(self,
-                 timestamp: datetime,
+                 timestamp,
                  tags=(),
                  exercises=(),
                  raw=None) -> None:
@@ -22,7 +22,7 @@ class Workout:
         self.tags = tags
         assert isinstance(exercises, Iterable)
         self.exercises = exercises
-        self.raw = None
+        self.raw = raw
 
     @classmethod
     def parse(cls, wkt_data):
@@ -35,7 +35,7 @@ class Workout:
         # Timestamp
         try:
             timestamp = parse_timestamp(wkt_data[0])
-        except:
+        except:  # Store the string for later re-parsing
             timestamp = wkt_data[0]
         # lines = lines[1:]
         # Tags

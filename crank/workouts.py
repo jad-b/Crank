@@ -1,11 +1,10 @@
 import json
 from collections.abc import Iterable
-from datetime import datetime
+
+from blist import blist
 
 from crank import parser
-from crank.fto.cli import read_until_valid
-
-from blist import sortedset
+from crank.workout import Workout
 
 
 class Workouts:
@@ -18,18 +17,18 @@ class Workouts:
     def __init__(self, filename=default_file):
         """Initialize with configuration."""
         self.filename = filename
-        self.workouts = sortedset()
+        self.workouts = blist()
 
     def save(self):
         with open(self.filename, 'w') as wf:
-            json.dump(self, wf, cls=WorkoutsJSONEncoder)
+            json.dump(self, wf, cls=WorkoutsJSONEncoder, indent='\t')
 
     def upgrade(self):
         """Upgrade workouts to a new syntax."""
-        for w in self.workouts:
-            if not isinstance(w[0], datetime):
-                prompt = '{}: '.format(w[0])
-                w[0] = read_until_valid(prompt, lmbda=parser.parse_timestamp)
+        for i, w in enumerate(self.workouts):
+            if not isinstance(self.workouts[i], Workout):
+                self.workouts[i] = Workout.parse(w)
+            self.workouts[i].upgrade()
 
     @classmethod
     def from_dict(cls, json_object):
@@ -37,7 +36,7 @@ class Workouts:
         wkts = cls()
         if 'filename' in json_object:
             wkts.filename = json_object['filename']
-        wkts.workouts = sortedset(json_object.get('workouts'))
+        wkts.workouts = blist(json_object.get('workouts'))
         return wkts
 
     @classmethod
@@ -64,7 +63,7 @@ class Workouts:
         ws = cls()
         for wkt_block in parser.buffer_data(wkts):
             # ws.workouts.add(Workout.parse(wkt_block))
-            ws.workouts.add(wkt_block)
+            ws.workouts.append(wkt_block)
         return ws
 
 
@@ -73,7 +72,7 @@ class WorkoutsJSONEncoder(json.JSONEncoder):
     def default(self, o):
         return {
             'filename': o.filename,
-            # Convert sortedset to a list for json encoding
-            # 'workouts': [w.to_json() for w in o.workouts]
-            'workouts': list(o.workouts)
+            # Convert blist to a list for json encoding
+            'workouts': [w.to_json() for w in o.workouts]
+            # 'workouts': list(o.workouts)
         }

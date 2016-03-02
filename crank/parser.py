@@ -42,6 +42,8 @@ def parse_timestamp(line):
         '%Y %b %d @ %H%M',
         '%d %b %Y @ %H%M',
         '%d %B %Y @ %H%M',
+        '%d%b%Y@%H%M',
+        '%d%b%Y @ %H%M',
     )
 
     exc = None
