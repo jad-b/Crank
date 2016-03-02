@@ -73,6 +73,6 @@ class WorkoutsJSONEncoder(json.JSONEncoder):
         return {
             'filename': o.filename,
             # Convert blist to a list for json encoding
-            'workouts': [w.to_json() for w in o.workouts]
+            'workouts': [w.to_dict() for w in o.workouts]
             # 'workouts': list(o.workouts)
         }
