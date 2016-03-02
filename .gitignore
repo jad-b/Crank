@@ -1,6 +1,10 @@
 workouts.json
 # test files
 *.test
+# Wercker
+_builds/
+_projects/
+_steps/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

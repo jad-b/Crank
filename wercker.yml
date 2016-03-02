@@ -1,8 +1,7 @@
-box: python
-# Build definition
+box: python:3-slim
 build:
-  box: python:3
   steps:
-    # Setup the virtualenv
-    - virtualenv
     - pip-install
+    - script:
+      name: Run unit tests
+      code: py.test
