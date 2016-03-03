@@ -33,7 +33,17 @@ class Workouts:
 
     @classmethod
     def from_dict(cls, json_object):
-        """Create Workouts from a dict."""
+        """Create Workouts from a dict.
+
+        This is intended for use in the json.loads 'default' argument. As such,
+        it will get passed _every_ parsed dict object, and needs a way to tell
+        the difference between nested dictionaries, such as Workouts vs. a
+        Workout.
+
+        This is gonna break when _more_ nested dictionaries start popping up.
+        Providing a custom JSONDecoder, whose 'decode()' method begins with the
+        raw pre-parsed JSON string, is probably a better long-term solution.
+        """
         LOGGER.debug("Parsing %s", str(json_object.keys()))
         if 'filename' in json_object:
             # import pdb; pdb.set_trace()
