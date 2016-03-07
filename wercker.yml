@@ -1,6 +1,9 @@
 box: python:3-slim
 build:
   steps:
+    - script: |
+      sudo apt-get update
+      sudo apt-get install -y gcc
     - pip-install
     - script:
       name: Run unit tests
