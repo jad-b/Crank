@@ -1,7 +1,7 @@
-import collections
+from collections.abc import Iterable, Mapping
 from datetime import datetime
-from collections.abc import Iterable
 
+from crank.tags import parse_tags
 from crank.parser import parse_timestamp
 from crank.fto.cli import read_until_valid
 
@@ -10,8 +10,8 @@ class Workout:
 
     def __init__(self,
                  timestamp,
-                 tags=(),
-                 exercises=(),
+                 tags=None,
+                 exercises=None,
                  raw=None) -> None:
         """Initialize the Workout with given values.
 
@@ -24,19 +24,19 @@ class Workout:
                 pass
         self.timestamp = timestamp
 
-        assert isinstance(tags, Iterable)
-        self.tags = tags
-        assert isinstance(exercises, Iterable)
-        self.exercises = exercises
+        self.tags = tags or {}
+        assert isinstance(self.tags, Mapping)
+        self.exercises = exercises or []
+        assert isinstance(self.exercises, Iterable)
 
         self.raw = raw
 
     @classmethod
-    def parse(cls, wkt_data):
-        """Create a Workout instance from a string, or iterable."""
+    def parse_wkt(cls, wkt_data):
+        """Create a Workout instance from a .wkt format string or iterable."""
         if isinstance(wkt_data, str):
             wkt_data = wkt_data.split('\n')
-        assert isinstance(wkt_data, collections.Iterable)
+        assert isinstance(wkt_data, Iterable)
         if not wkt_data:
             raise ValueError("Empty value provided")
         # Timestamp
@@ -44,23 +44,26 @@ class Workout:
             timestamp = parse_timestamp(wkt_data[0])
         except:  # Store the string for later re-parsing
             timestamp = wkt_data[0]
-        # lines = lines[1:]
         # Tags
-        # wkt['tags'], lines = parse_tags(lines)
+        tags, wkt_data = parse_tags(wkt_data[1:])
         # Exercises
         # wkt['exercises'] = exs = []
-        # while len(lines) > 0:
-        # ex, lines = Exercise.parse(lines)
+        # while len(wkt_data) > 0:
+        # ex, wkt_data = Exercise.parse(wkt_data)
         # exs.append(ex)
-        return Workout(timestamp, raw=wkt_data[1:])
+        return Workout(timestamp, tags=tags, raw=wkt_data)
 
     def upgrade(self):
         if not isinstance(self.timestamp, datetime):
             prompt = '{}: '.format(self.timestamp)
             self.timestamp = read_until_valid(prompt, lmbda=parse_timestamp)
+        if not self.tags:
+            self.tags, self.raw = parse_tags(self.raw)
 
-    def to_dict(self):
+    def to_json(self):
         d = {
+            'exercises': self.exercises,
+            'tags': self.tags,
             'raw': self.raw
         }
         if isinstance(self.timestamp, datetime):
@@ -70,9 +73,8 @@ class Workout:
         return d
 
     @classmethod
-    def from_dict(cls, d):
-        return cls(timestamp=d['timestamp'],
-                   raw=d['raw'])
+    def from_json(cls, d):
+        return cls(**d)
 
     def __lt__(self, other):
         if not isinstance(other, Workout):

@@ -1,11 +1,12 @@
 import unittest
 from datetime import datetime
 
-from crank.workouts import Workout
+from crank.workout import Workout
 
 
 TEST_WORKOUT_LINES = [
     '2015 Oct 19 @ 1800',
+    '- This workout will suck.',
     'Swing, KB: 28 x 35',
     'Squat: 20, 60 x 5, 80, 90 x 3, 91, 105 x 5, 119 x 4',
     '- unit: kg',
@@ -14,6 +15,7 @@ TEST_WORKOUT_LINES = [
     'Plate pinch: 15 x 35/30'
 ]
 
+
 TEST_WORKOUT_RAW = Workout(timestamp=TEST_WORKOUT_LINES[0],
                            raw=TEST_WORKOUT_LINES[1:])
 
@@ -21,14 +23,34 @@ TEST_WORKOUT_RAW = Workout(timestamp=TEST_WORKOUT_LINES[0],
 class TestWorkout(unittest.TestCase):
 
     def test_parsing(self):
-        wkt = Workout.parse(TEST_WORKOUT_LINES)
+        wkt = Workout.parse_wkt(TEST_WORKOUT_LINES)
         assert isinstance(wkt.timestamp, datetime)
-        assert wkt.raw == TEST_WORKOUT_LINES[1:]
+        assert 'comment' in wkt.tags
+        assert wkt.raw == TEST_WORKOUT_LINES[2:]
+
+    def test_to_json(self):
+        d = TEST_WORKOUT_RAW.to_json()
+        assert 'timestamp' in d
+        assert 'raw' in d
+
+    def test_from_json(self):
+        TEST_WORKOUT_JSON = {
+            'timestamp': TEST_WORKOUT_RAW.timestamp.isoformat(),
+            'exercises': [],
+            'raw': TEST_WORKOUT_RAW.raw
+        }
+        w = Workout.from_json(TEST_WORKOUT_JSON)
+        assert w.timestamp == TEST_WORKOUT_RAW.timestamp
+        assert w.raw == TEST_WORKOUT_RAW.raw
 
     def test_encoding(self):
-        wkt = Workout.parse(TEST_WORKOUT_LINES)
+        wkt = Workout.parse_wkt(TEST_WORKOUT_LINES)
         exp = {
             'timestamp': wkt.timestamp.isoformat(),
-            'raw': TEST_WORKOUT_LINES[1:]
+            'exercises': [],
+            'tags': {
+                'comment': TEST_WORKOUT_LINES[1][2:]  # Drop '- '
+            },
+            'raw': TEST_WORKOUT_LINES[2:]
         }
-        assert wkt.to_dict() == exp
+        assert wkt.to_json() == exp
