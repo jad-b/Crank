@@ -39,7 +39,7 @@ def get_max_from_previous(prev_weight, curr_week, increment=5,
     return max_weight
 
 
-def calc_warmup_sets(max_weight, units=MassUnit.lbs):
+def calc_warmup_sets(max_weight):
     """Return warm-up sets, based on top weight of the day."""
     percents = (0.4, 0.5, 0.6)
 
@@ -57,7 +57,7 @@ def build_sets(max_weight, percent, units=MassUnit.lbs):
         set will be calculated at.
     :param str units: Whether to calculate in lbs or kgs.
     """
-    warm_ups = calc_warmup_sets(max_weight, units)
+    warm_ups = calc_warmup_sets(max_weight)
     steps = (0.2, 0.1, 0)
     sets = list(map(lambda x: max_weight * (percent - x), steps))
     return mround(warm_ups + sets, units)

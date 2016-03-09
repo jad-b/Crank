@@ -32,17 +32,6 @@ class TestCalcWarmupSets(TestCase):
         actual = logic.calc_warmup_sets(self.max_weight)
         self.assertEqual(actual, expected)
 
-    def test_units_are_kgs(self):
-        """Test we use the correct ceiling when in kilograms."""
-        max_weight = 77
-
-        kgs_actual = logic.calc_warmup_sets(max_weight, units='kgs')
-        lbs_actual = logic.calc_warmup_sets(max_weight, units='lbs')
-
-        # Assert we produced a different output, as rough stand-in for
-        # testing it was more-granular
-        self.assertNotEqual(kgs_actual, lbs_actual)
-
 
 class TestBuildSets(TestCase):
 
