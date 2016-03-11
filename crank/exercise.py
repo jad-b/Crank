@@ -1,39 +1,78 @@
-from crank.parser import ParseCallback, LOGGER
+from pprint import pformat
+
+from crank.parser import LOGGER
 from crank.tags import parse_tags
 
 
-class Exercise:
-
-    @classmethod
-    def parse(cls, lines):
-        while len(lines) > 0:
-            cls(lines)
-
-    def __init__(self, lines):
-        self.lines = lines
+def parse_exercises(lines):
+    exs = []
+    while len(lines) > 0:
+        ex, lines = Exercise.parse_wkt(lines)
+        exs.append(ex)
+    return exs
 
 
 def parse_exercise(lines):
-    LOGGER.debug("Exercise: %s", lines)
-    LOGGER.debug("Before: %s", lines[0])
-    # Exercise name & sets
-    ex = {}
-    ex['name'], ex['sets'] = parse_exercise_name(lines[0])
-    lines = lines[1:]
-    LOGGER.info('Name: %s, Sets: %s', ex['name'], ex['sets'])
-    # Tags
-    if len(lines) > 1:
-        ex['tags'], lines = parse_tags(lines)
-    LOGGER.debug("Remaining: %s", lines)
-    return ex, lines
+        LOGGER.debug("Exercise: %s", lines)
+        # Exercise name & sets
+        ex = {}
+        ex['name'], ex['sets'] = parse_exercise_name(lines[0])
+        ex['name'] = ex['name'].strip()
+        ex['sets'] = ex['sets'].strip()
+        lines = lines[1:]
+        LOGGER.info('Name: %s, Sets: %s', ex['name'], ex['sets'])
+        # Tags
+        if len(lines) > 1:
+            ex['tags'], lines = parse_tags(lines)
+        LOGGER.debug("Remaining: %s", lines)
+        return Exercise(**ex), lines
 
 
 def parse_exercise_name(line):
     try:
         name_sets = line.split(':')
         if len(name_sets) != 2:
-            return ParseCallback('exercise name', line, parse_exercise), ''
+            return line
         return name_sets[0], name_sets[1]
     except Exception:
         LOGGER.exception('Error while parsing exercise')
-        return ParseCallback('exercise name', line, parse_exercise), ''
+        return line
+
+
+class Exercise:
+
+    def __init__(self,
+                 name='',
+                 sets=None,
+                 tags=None):
+        self.name = name
+        self.sets = sets or []
+        self.tags = tags or {}
+
+    @classmethod
+    def parse_wkt(cls, lines):
+        ex, lines = parse_exercise(lines)
+        # No lines should be leftover
+        assert not lines, "Content remaining after parsing: {}".format(lines)
+        return ex
+
+    def to_json(self):
+        return {
+            'name': self.name,
+            'tags': self.tags,
+            'sets': self.sets
+        }
+
+    @classmethod
+    def from_json(cls, d):
+        return cls(**d)
+
+    def __eq__(self, o):
+        if not isinstance(o, Exercise):
+            return NotImplemented
+        return (self.name == o.name and
+                self.tags == o.tags and
+                self.sets == o.sets)
+
+    def __str__(self):
+        return pformat(self.to_json())

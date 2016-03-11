@@ -1,6 +1,7 @@
 from collections.abc import Iterable, Mapping
 from datetime import datetime
 
+from crank.exercise import parse_exercises
 from crank.tags import parse_tags
 from crank.parser import parse_timestamp
 from crank.fto.cli import read_until_valid
@@ -47,18 +48,22 @@ class Workout:
         # Tags
         tags, wkt_data = parse_tags(wkt_data[1:])
         # Exercises
-        # wkt['exercises'] = exs = []
-        # while len(wkt_data) > 0:
-        # ex, wkt_data = Exercise.parse(wkt_data)
-        # exs.append(ex)
-        return Workout(timestamp, tags=tags, raw=wkt_data)
+        exercises, wkt_data = parse_exercises(wkt_data)
+        return Workout(timestamp, tags=tags, exercises=exercises, raw=wkt_data)
 
     def upgrade(self):
+        """Upgrade bootstraps the Exercise to a new schema.
+
+        Schema versions aren't explicitly tracked, as everything's still in
+        development.
+        """
         if not isinstance(self.timestamp, datetime):
             prompt = '{}: '.format(self.timestamp)
             self.timestamp = read_until_valid(prompt, lmbda=parse_timestamp)
         if not self.tags:
             self.tags, self.raw = parse_tags(self.raw)
+        if not self.exercises:
+            self.exercises, self.raw = parse_exercises(self.raw)
 
     def to_json(self):
         d = {
