@@ -51,13 +51,11 @@ class Workouts:
         raw pre-parsed JSON string, is probably a better long-term solution.
         """
         LOGGER.debug("Parsing %s", str(json_object.keys()))
-        # import pdb; pdb.set_trace()
-        if 'filename' in json_object:
-            # Decode each workout
-            wkts = []
-            for w in json_object['workouts']:
-                wkts.append(Workout.from_json(w))
-            return cls(json_object['filename'], wkts)
+        # Decode each workout
+        wkts = []
+        for w in json_object['workouts']:
+            wkts.append(Workout.from_json(w))
+        return cls(json_object['filename'], wkts)
 
     def save(self):
         with open(self.filename, 'w') as wf:

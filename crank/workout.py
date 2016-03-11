@@ -1,7 +1,7 @@
 from collections.abc import Iterable, Mapping
 from datetime import datetime
 
-from crank.exercise import parse_exercises
+from crank.exercise import parse_exercises, Exercise
 from crank.tags import parse_tags
 from crank.parser import parse_timestamp
 from crank.fto.cli import read_until_valid
@@ -12,12 +12,8 @@ class Workout:
     def __init__(self,
                  timestamp,
                  tags=None,
-                 exercises=None,
-                 raw=None) -> None:
-        """Initialize the Workout with given values.
-
-        :attr str or list raw: Unprocessed data.
-        """
+                 exercises=None) -> None:
+        """Initialize the Workout with given values."""
         if isinstance(timestamp, str):
             try:
                 timestamp = parse_timestamp(timestamp)
@@ -29,8 +25,6 @@ class Workout:
         assert isinstance(self.tags, Mapping)
         self.exercises = exercises or []
         assert isinstance(self.exercises, Iterable)
-
-        self.raw = raw
 
     @classmethod
     def parse_wkt(cls, wkt_data):
@@ -48,8 +42,8 @@ class Workout:
         # Tags
         tags, wkt_data = parse_tags(wkt_data[1:])
         # Exercises
-        exercises, wkt_data = parse_exercises(wkt_data)
-        return Workout(timestamp, tags=tags, exercises=exercises, raw=wkt_data)
+        exercises = parse_exercises(wkt_data)
+        return Workout(timestamp, tags=tags, exercises=exercises)
 
     def upgrade(self):
         """Upgrade bootstraps the Exercise to a new schema.
@@ -60,16 +54,11 @@ class Workout:
         if not isinstance(self.timestamp, datetime):
             prompt = '{}: '.format(self.timestamp)
             self.timestamp = read_until_valid(prompt, lmbda=parse_timestamp)
-        if not self.tags:
-            self.tags, self.raw = parse_tags(self.raw)
-        if not self.exercises:
-            self.exercises, self.raw = parse_exercises(self.raw)
 
     def to_json(self):
         d = {
-            'exercises': self.exercises,
-            'tags': self.tags,
-            'raw': self.raw
+            'exercises': [ex.to_json() for ex in self.exercises],
+            'tags': self.tags
         }
         if isinstance(self.timestamp, datetime):
             d['timestamp'] = self.timestamp.isoformat()
@@ -79,6 +68,10 @@ class Workout:
 
     @classmethod
     def from_json(cls, d):
+        exs = []
+        for ex in d.get('exercises', []):
+            exs.append(Exercise.from_json(ex))
+        d['exercises'] = exs
         return cls(**d)
 
     def __lt__(self, other):

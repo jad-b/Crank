@@ -7,24 +7,26 @@ from crank.tags import parse_tags
 def parse_exercises(lines):
     exs = []
     while len(lines) > 0:
-        ex, lines = Exercise.parse_wkt(lines)
+        ex, lines = parse_exercise(lines)
         exs.append(ex)
+        LOGGER.debug("Parsed Exercise:\n%s", ex)
+        LOGGER.debug("Remaining lines:\n%s", lines)
     return exs
 
 
 def parse_exercise(lines):
-        LOGGER.debug("Exercise: %s", lines)
+        # LOGGER.debug("Exercise: %s", lines)
         # Exercise name & sets
         ex = {}
         ex['name'], ex['sets'] = parse_exercise_name(lines[0])
         ex['name'] = ex['name'].strip()
         ex['sets'] = ex['sets'].strip()
+        # LOGGER.info('Name: %s, Sets: %s', ex['name'], ex['sets'])
         lines = lines[1:]
-        LOGGER.info('Name: %s, Sets: %s', ex['name'], ex['sets'])
         # Tags
-        if len(lines) > 1:
+        if lines:
             ex['tags'], lines = parse_tags(lines)
-        LOGGER.debug("Remaining: %s", lines)
+        # LOGGER.debug("Remaining: %s", lines)
         return Exercise(**ex), lines
 
 
@@ -76,3 +78,6 @@ class Exercise:
 
     def __str__(self):
         return pformat(self.to_json())
+
+    def __repr__(self):
+        return 'Exercise<{}>'.format(self.name)

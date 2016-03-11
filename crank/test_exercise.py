@@ -1,4 +1,4 @@
-from crank.exercise import Exercise
+from crank.exercise import Exercise, parse_exercises
 
 
 TEST_EXERCISE_LINES = [
@@ -11,7 +11,6 @@ TEST_EXERCISE_LINES = [
 ]
 
 TEST_SQUAT_LINES = TEST_EXERCISE_LINES[1:4]
-
 
 TEST_SQUAT_JSON = {
     'name': 'Squat',
@@ -47,3 +46,8 @@ def test_from_json():
 def test_encoding():
     ex = Exercise.parse_wkt(TEST_SQUAT_LINES)
     assert ex.to_json() == TEST_SQUAT_JSON
+
+
+def test_parsing_exercise_lines():
+    exs = parse_exercises(TEST_EXERCISE_LINES)
+    assert len(exs) == 4

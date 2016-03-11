@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from crank.workout import Workout
+from crank.exercise import Exercise
 
 
 TEST_WORKOUT_LINES = [
@@ -15,51 +16,45 @@ TEST_WORKOUT_LINES = [
 ]
 
 
-TEST_WORKOUT_RAW = Workout(timestamp=TEST_WORKOUT_LINES[0],
-                           tags={'comment': TEST_WORKOUT_LINES[1][2:]},
-                           raw=TEST_WORKOUT_LINES[2:])
+TEST_WORKOUT = Workout(timestamp=TEST_WORKOUT_LINES[0],
+                       tags={'comment': TEST_WORKOUT_LINES[1][2:]},
+                       exercises=[
+                           Exercise.parse_wkt([TEST_WORKOUT_LINES[2]]),
+                           Exercise.parse_wkt(TEST_WORKOUT_LINES[3:6]),
+                           Exercise.parse_wkt([TEST_WORKOUT_LINES[6]]),
+                           Exercise.parse_wkt([TEST_WORKOUT_LINES[7]])
+                            ])
+
+
+TEST_WORKOUT_JSON = {
+    'timestamp': TEST_WORKOUT.timestamp.isoformat(),
+    'exercises': [ex.to_json() for ex in TEST_WORKOUT.exercises],
+    'tags': {
+        'comment': TEST_WORKOUT_LINES[1][2:]  # Drop '- '
+    },
+}
 
 
 def test_parsing():
     wkt = Workout.parse_wkt(TEST_WORKOUT_LINES)
     assert isinstance(wkt.timestamp, datetime)
     assert 'comment' in wkt.tags
-    assert wkt.exercises == []
-    assert wkt.raw == TEST_WORKOUT_LINES[2:]
+    assert len(wkt.exercises) == 4
 
 
 def test_to_json():
-    d = TEST_WORKOUT_RAW.to_json()
+    d = TEST_WORKOUT.to_json()
     assert 'timestamp' in d
     assert 'tags' in d
     assert 'exercises' in d
-    assert 'raw' in d
 
 
 def test_from_json():
-    TEST_WORKOUT_JSON = {
-        'timestamp': TEST_WORKOUT_RAW.timestamp.isoformat(),
-        'exercises': [],
-        'tags': {
-            'comment': TEST_WORKOUT_LINES[1][2:]  # Drop '- '
-        },
-        'raw': TEST_WORKOUT_RAW.raw
-    }
     w = Workout.from_json(TEST_WORKOUT_JSON)
-    assert w.timestamp == TEST_WORKOUT_RAW.timestamp
-    assert w.tags == TEST_WORKOUT_RAW.tags
-    assert w.exercises == TEST_WORKOUT_RAW.exercises
-    assert w.raw == TEST_WORKOUT_RAW.raw
+    assert w.timestamp == TEST_WORKOUT.timestamp
+    assert w.tags == TEST_WORKOUT.tags
+    assert w.exercises == TEST_WORKOUT.exercises
 
 
 def test_encoding():
-    wkt = Workout.parse_wkt(TEST_WORKOUT_LINES)
-    exp = {
-        'timestamp': wkt.timestamp.isoformat(),
-        'exercises': [],
-        'tags': {
-            'comment': TEST_WORKOUT_LINES[1][2:]  # Drop '- '
-        },
-        'raw': TEST_WORKOUT_LINES[2:]
-    }
-    assert wkt.to_json() == exp
+    assert TEST_WORKOUT.to_json() == TEST_WORKOUT_JSON
