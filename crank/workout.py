@@ -71,8 +71,9 @@ class Workout:
         exs = []
         for ex in d.get('exercises', []):
             exs.append(Exercise.from_json(ex))
-        d['exercises'] = exs
-        return cls(**d)
+        d_wkt = dict(d)
+        d_wkt['exercises'] = exs
+        return cls(**d_wkt)
 
     def __lt__(self, other):
         if not isinstance(other, Workout):

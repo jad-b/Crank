@@ -21,16 +21,16 @@ TEST_SQUAT_JSON = {
     'sets': '20, 60 x 5, 80, 90 x 3, 91, 105 x 5, 119 x 4'
 }
 
-TEST_EXERCISE_INSTANCE = Exercise(**TEST_SQUAT_JSON)
+TEST_EXERCISE = Exercise(**TEST_SQUAT_JSON)
 
 
 def test_exercise_parsing():
     ex = Exercise.parse_wkt(TEST_SQUAT_LINES)
-    assert ex == TEST_EXERCISE_INSTANCE, str(ex)
+    assert ex == TEST_EXERCISE, str(ex)
 
 
 def test_to_json():
-    d = TEST_EXERCISE_INSTANCE.to_json()
+    d = TEST_EXERCISE.to_json()
     assert 'name' in d
     assert 'tags' in d
     assert 'sets' in d
@@ -38,14 +38,13 @@ def test_to_json():
 
 def test_from_json():
     ex = Exercise.from_json(TEST_SQUAT_JSON)
-    assert ex.name == TEST_EXERCISE_INSTANCE.name
-    assert ex.tags == TEST_EXERCISE_INSTANCE.tags
-    assert ex.sets == TEST_EXERCISE_INSTANCE.sets
+    assert ex.name == TEST_EXERCISE.name
+    assert ex.tags == TEST_EXERCISE.tags
+    assert ex.sets == TEST_EXERCISE.sets
 
 
 def test_encoding():
-    ex = Exercise.parse_wkt(TEST_SQUAT_LINES)
-    assert ex.to_json() == TEST_SQUAT_JSON
+    assert TEST_EXERCISE.to_json() == TEST_SQUAT_JSON
 
 
 def test_parsing_exercise_lines():

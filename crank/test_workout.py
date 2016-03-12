@@ -16,19 +16,20 @@ TEST_WORKOUT_LINES = [
 ]
 
 
+TEST_WORKOUT_EXERCISES = [
+    Exercise.parse_wkt([TEST_WORKOUT_LINES[2]]),
+    Exercise.parse_wkt(TEST_WORKOUT_LINES[3:6]),
+    Exercise.parse_wkt([TEST_WORKOUT_LINES[6]]),
+    Exercise.parse_wkt([TEST_WORKOUT_LINES[7]])
+]
 TEST_WORKOUT = Workout(timestamp=TEST_WORKOUT_LINES[0],
                        tags={'comment': TEST_WORKOUT_LINES[1][2:]},
-                       exercises=[
-                           Exercise.parse_wkt([TEST_WORKOUT_LINES[2]]),
-                           Exercise.parse_wkt(TEST_WORKOUT_LINES[3:6]),
-                           Exercise.parse_wkt([TEST_WORKOUT_LINES[6]]),
-                           Exercise.parse_wkt([TEST_WORKOUT_LINES[7]])
-                            ])
+                       exercises=TEST_WORKOUT_EXERCISES)
 
-
+TEST_WORKOUT_EXERCISE_JSON = [ex.to_json() for ex in TEST_WORKOUT_EXERCISES]
 TEST_WORKOUT_JSON = {
     'timestamp': TEST_WORKOUT.timestamp.isoformat(),
-    'exercises': [ex.to_json() for ex in TEST_WORKOUT.exercises],
+    'exercises': TEST_WORKOUT_EXERCISE_JSON,
     'tags': {
         'comment': TEST_WORKOUT_LINES[1][2:]  # Drop '- '
     },
