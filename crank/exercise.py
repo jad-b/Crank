@@ -48,8 +48,11 @@ class Exercise:
                  sets=None,
                  tags=None):
         self.name = name
+        assert isinstance(self.name, str)
         self.sets = sets or []
+        assert isinstance(self.sets, Iterable)
         self.tags = tags or {}
+        assert isinstance(self.tags, Mapping)
 
     @classmethod
     def parse_wkt(cls, lines):
