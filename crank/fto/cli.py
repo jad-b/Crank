@@ -4,6 +4,7 @@ cli.py
 ===
 User-facing command-line functions for :module:`fto.logic`.
 """
+from argparse import ArgumentParser
 import string
 
 from crank.fto.logic import print_exercise, MassUnit
@@ -51,5 +52,21 @@ def process_input():
     print_exercise(name, weight, week, units)
 
 
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument('-n', '--name')
+    parser.add_argument('-u', '--units', default='kg')
+    parser.add_argument('--weight', type=int)
+    parser.add_argument('--week', type=int)
+    parser.add_argument('--increment', type=int)
+    parser.add_argument('-m', '--max', type=int)
+    return parser.parse_args()
+
 if __name__ == '__main__':
+    args = parse_args()
+    if args.name:
+        if args.increment:
+            args.weights += args.increment
+        print_exercise(args.name, args.weight, args.week, MassUnit.kilograms)
+    else:
         process_input()
