@@ -1,3 +1,4 @@
+from collections.abc import Iterable, Mapping
 from pprint import pformat
 
 from crank.parser import LOGGER

@@ -14,7 +14,7 @@
     * [ ] Parse exercises from string or list of strings
     * [ ] Output as JSON
 * [ ] Parse Sets
-    * [ ] Parse set from string
+    * [ ] Parse Sets from string
+        * Consolidate successfully parsed formats to a table-driven test
+        * [x] Create test cases for string formats
     * [ ] Output as JSON
-    * [ ] Handle shorthand notation for same weight|reps
-    * [ ] Handle special set types (rest/pause, giant sets)
