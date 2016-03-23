@@ -1,4 +1,5 @@
-from crank.set import Set
+from collections import namedtuple
+from crank.set import Set, rest_pause, max_err, max_slope, work_rep_sim
 
 
 class SetCase:
@@ -83,6 +84,39 @@ TEST_SET_STRINGS = {
         []
     )
 }
+
+
+def test_rep_detection():
+    TestCase = namedtuple('TestCase', ('work', 'reps', 'index'))
+    cases = (
+        TestCase(100, [5, 7, 70, 80, 90], 2),
+        TestCase(20, [12, 13, 23, 22], 2)
+    )
+    predictions = {}
+    # import pdb
+    for c in cases:
+        predictions[str(c.reps)] = {
+            'max_err': max_err(c.work, c.reps),
+            'max_slope': max_slope(c.reps),
+            'work_rep_sim': work_rep_sim(c.work, c.reps)
+        }
+    # pdb.set_trace()
+    from pprint import pprint
+    pprint(predictions)
+
+
+def test_rest_pause():
+    rp_str = '5/4/3'
+    test_weight = 100
+    exp = [
+        Set(work=test_weight, reps=5),
+        Set(work=test_weight, reps=4),
+        Set(work=test_weight, reps=3),
+    ]
+    obs = rest_pause(test_weight, rp_str)
+    assert obs == exp
+    # An empty list should be returned if no rest-pause notation is found
+    assert rest_pause(test_weight, '543') == []
 
 
 def test_master_parsing():
