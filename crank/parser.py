@@ -1,19 +1,9 @@
 from datetime import datetime
-import logging
 import re
 
 import dateutil.parser
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.propagate = False
-LOGGER.setLevel(logging.DEBUG)
-sh = logging.StreamHandler()
-sh.setLevel(logging.DEBUG)
-log_fmt = logging.Formatter(
-    "%(levelname)s %(filename)s.%(funcName)s:%(lineno)d\t%(message)s"
-)
-sh.setFormatter(log_fmt)
-LOGGER.addHandler(sh)
+from crank.logging import logger
 
 
 class ParseCallback:
@@ -60,7 +50,7 @@ def parse_timestamp(line):
         except Exception as e:
             exc = e
     else:
-        LOGGER.warning("Failed to parse: %s", line)
+        logger.warning("Failed to parse: %s", line)
         raise exc
 
 
@@ -70,7 +60,7 @@ def stream_str_blocks(s):
 
 
 def stream_file(filename):
-    LOGGER.debug('opening %s', filename)
+    logger.debug('opening %s', filename)
     with open(filename) as fp:
         for line in fp:
             yield line

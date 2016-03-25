@@ -1,8 +1,9 @@
 from collections.abc import Iterable, Mapping
 from pprint import pformat
 
-from crank.parser import LOGGER
+from crank.logging import logger
 from crank.tags import parse_tags
+from crank.set import Set
 
 
 def parse_exercises(lines):
@@ -10,25 +11,24 @@ def parse_exercises(lines):
     while len(lines) > 0:
         ex, lines = parse_exercise(lines)
         exs.append(ex)
-        LOGGER.debug("Parsed Exercise:\n%s", ex)
-        LOGGER.debug("Remaining lines:\n%s", lines)
+        logger.debug("Parsed Exercise:\n%s", ex)
+        logger.debug("Remaining lines:\n%s", pformat(lines))
     return exs
 
 
 def parse_exercise(lines):
-        # LOGGER.debug("Exercise: %s", lines)
-        # Exercise name & sets
-        ex = {}
-        ex['name'], ex['sets'] = parse_exercise_name(lines[0])
-        ex['name'] = ex['name'].strip()
-        ex['sets'] = ex['sets'].strip()
-        # LOGGER.info('Name: %s, Sets: %s', ex['name'], ex['sets'])
-        lines = lines[1:]
-        # Tags
-        if lines:
-            ex['tags'], lines = parse_tags(lines)
-        # LOGGER.debug("Remaining: %s", lines)
-        return Exercise(**ex), lines
+    logger.debug("Parsing Exercise from:\n%s", lines)
+    # Exercise name & sets
+    ex = {}
+    ex['name'], ex['sets'] = parse_exercise_name(lines[0])
+    ex['name'] = ex['name'].strip()
+    lines = lines[1:]
+    # Tags
+    if lines:
+        ex['tags'], lines = parse_tags(lines)
+    # Sets
+    ex['sets'] = Set.parse_sets(ex['sets'].strip())
+    return Exercise(**ex), lines
 
 
 def parse_exercise_name(line):
@@ -38,7 +38,7 @@ def parse_exercise_name(line):
             return line
         return name_sets[0], name_sets[1]
     except Exception:
-        LOGGER.exception('Error while parsing exercise')
+        logger.exception('Error while parsing exercise name from %s', line)
         return line
 
 

@@ -1,10 +1,12 @@
 from collections.abc import Iterable, Mapping
 from datetime import datetime
+from pprint import pformat
 
 from crank.exercise import parse_exercises, Exercise
-from crank.tags import parse_tags
-from crank.parser import parse_timestamp
 from crank.fto.cli import read_until_valid
+from crank.logging import logger
+from crank.parser import parse_timestamp
+from crank.tags import parse_tags
 
 
 class Workout:
@@ -29,6 +31,7 @@ class Workout:
     @classmethod
     def parse_wkt(cls, wkt_data):
         """Create a Workout instance from a .wkt format string or iterable."""
+        logger.debug("Parsing Workout:\n%s", pformat(wkt_data))
         if isinstance(wkt_data, str):
             wkt_data = wkt_data.split('\n')
         assert isinstance(wkt_data, Iterable)

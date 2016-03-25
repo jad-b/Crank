@@ -3,8 +3,8 @@ from collections.abc import Iterable
 
 from blist import blist
 
-from crank.parser import LOGGER
 from crank import parser
+from crank.parser import logger
 from crank.workout import Workout
 
 
@@ -50,7 +50,7 @@ class Workouts:
         Providing a custom JSONDecoder, whose 'decode()' method begins with the
         raw pre-parsed JSON string, is probably a better long-term solution.
         """
-        LOGGER.debug("Parsing %s", str(json_object.keys()))
+        logger.debug("Parsing %s", str(json_object.keys()))
         # Decode each workout
         wkts = []
         for w in json_object['workouts']:

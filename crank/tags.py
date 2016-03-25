@@ -1,4 +1,5 @@
-from crank.parser import LOGGER, ParseCallback
+from crank.parser import ParseCallback
+from crank.logging import logger
 
 
 def parse_tags(lines):
@@ -12,7 +13,7 @@ def parse_tags(lines):
                 tags[parts[0]] = parts[1].strip()
         else:
             break
-    LOGGER.debug("Tags: %s", tags)
+    logger.debug("Parsed tags: %s", tags)
     return tags, lines[len(tags):]
 
 
