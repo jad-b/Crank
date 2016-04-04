@@ -1,10 +1,10 @@
 import json
 from collections.abc import Iterable
+from datetime import datetime
 
-from blist import blist
+from blist import sortedset
 
 from crank import parser
-from crank.parser import logger
 from crank.workout import Workout
 
 
@@ -18,7 +18,8 @@ class Workouts:
     def __init__(self, filename=default_file, workouts=()):
         """Initialize with configuration."""
         self.filename = filename
-        self.workouts = blist(workouts)
+        self.workouts = sortedset(workouts)
+        self.modified = None
 
     def upgrade(self):
         """Upgrade workouts to a new syntax."""
@@ -29,33 +30,20 @@ class Workouts:
 
     def to_json(self, *args):
         """Convert Workouts to a JSON-compatible dictionary."""
-        wkts = []
-        for w in self.workouts:
-            wkts.append(w.to_json())
         return {
             'filename': self.filename,
-            'workouts': wkts
+            'workouts': [w.to_json() for w in self.workouts],
+            'written_at': str(datetime.utcnow())
         }
 
     @classmethod
     def from_json(cls, json_object):
-        """Create Workouts from a dict.
-
-        This is intended for use in the json.loads 'default' argument. As such,
-        it will get passed _every_ parsed dict object, and needs a way to tell
-        the difference between nested dictionaries, such as Workouts vs. a
-        Workout.
-
-        This is gonna break when _more_ nested dictionaries start popping up.
-        Providing a custom JSONDecoder, whose 'decode()' method begins with the
-        raw pre-parsed JSON string, is probably a better long-term solution.
-        """
-        logger.debug("Parsing %s", str(json_object.keys()))
-        # Decode each workout
-        wkts = []
-        for w in json_object['workouts']:
-            wkts.append(Workout.from_json(w))
-        return cls(json_object['filename'], wkts)
+        """Create Workouts from a dict."""
+        return cls(**{
+            'filename': json_object.get('filename'),
+            'workouts': sortedset([Workout.from_json(w) for w in
+                                   json_object.get('workouts', [])])
+            })
 
     def save(self):
         with open(self.filename, 'w') as wf:
@@ -83,9 +71,14 @@ class Workouts:
         if not wkts:
             raise ValueError("Empty value provided")
         ws = cls()
+
         for wkt_block in parser.buffer_data(wkts):
-            ws.workouts.append(Workout.parse_wkt(wkt_block))
+            ws.workouts.add(Workout.parse_wkt(wkt_block))
         return ws
+
+    def __repr__(self):
+        json_str = json.dumps(self.to_json(), indent=2)
+        return "Workouts(**{})".format(json_str)
 
 
 class WorkoutsJSONEncoder(json.JSONEncoder):

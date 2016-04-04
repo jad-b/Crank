@@ -37,6 +37,13 @@ def read_until_valid(prompt, valid_inputs=None, lmbda=None):
             return user_input
 
 
+def confirm_input(string):
+    """Confirm the input looks good."""
+    x = read_until_valid("Does this look good? [y/n] =>\n{}\n".format(string),
+                         ['y', 'n'])
+    return x == 'y'
+
+
 def process_input():
     """Guide user through weight calculations via CLI prompts."""
     name = read_until_valid("Please enter the exercise name: ",

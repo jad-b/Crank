@@ -57,6 +57,8 @@ class Workout:
         if not isinstance(self.timestamp, datetime):
             prompt = '{}: '.format(self.timestamp)
             self.timestamp = read_until_valid(prompt, lmbda=parse_timestamp)
+        for ex in self.exercises:
+            ex.upgrade()
 
     def to_json(self):
         d = {
@@ -71,19 +73,31 @@ class Workout:
 
     @classmethod
     def from_json(cls, d):
-        exs = []
-        for ex in d.get('exercises', []):
-            exs.append(Exercise.from_json(ex))
         d_wkt = dict(d)
-        d_wkt['exercises'] = exs
+        d_wkt['exercises'] = [Exercise.from_json(ex) for ex in
+                              d.get('exercises', [])]
         return cls(**d_wkt)
 
     def __lt__(self, other):
         if not isinstance(other, Workout):
             return NotImplemented
+        if isinstance(self.timestamp, str):
+            return True
+        elif isinstance(other.timestamp, str):
+            return False
         return self.timestamp < other.timestamp
 
     def __eq__(self, other):
         if not isinstance(other, Workout):
             return NotImplemented
         return self.timestamp == other.timestamp
+
+    def __hash__(self):
+        """Hash based off our timestamp."""
+        return hash(self.timestamp)
+
+    def __repr__(self):
+        return ("Workout(timestamp={}, "
+                "exercises=[{}])").format(
+                    str(self.timestamp),
+                    ','.join((ex.name for ex in self.exercises)))

@@ -13,7 +13,8 @@ def parse_tags(lines):
                 tags[parts[0]] = parts[1].strip()
         else:
             break
-    logger.debug("Parsed tags: %s", tags)
+    if tags:
+        logger.debug("Parsed tags: %s", tags)
     return tags, lines[len(tags):]
 
 

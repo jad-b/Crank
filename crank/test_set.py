@@ -1,8 +1,10 @@
+import textwrap
 from collections import namedtuple
-from crank.set import (Set, parse_sets, rest_pause, max_err, max_slope,
-                       work_rep_sim)
 
 import pytest
+
+from crank.set import (Set, rest_pause, max_err, max_slope,
+                       work_rep_sim)
 
 
 class SetCase:
@@ -10,6 +12,42 @@ class SetCase:
     def __init__(self, string, exp):
         self.string = string
         self.exp = exp
+
+
+FUTURE_SET = {
+    'object': Set(
+    ),
+    'raw': textwrap.dedent(
+        """
+        2016 Apr 04 @ 1246
+        Press:
+        - sets:
+            - 24 x 5
+            - 30 x 5
+            - 37 x 3
+            - 43 x 3
+            - 49 x 3
+            - 55 x 8
+        - Training max: 61 kgs
+        - week: 2
+        Pull-up: 5 x 9/4/2
+        Press: 42 x 10/3/2
+        Handstands: 12, 8
+        - unit: breaths
+
+        """),
+    'old_raw': textwrap.dedent(
+        """
+        2016 Apr 04 @ 1246
+        Press: 24 x 5, 30 x 5, 37 x 3, 43 x 3, 49 x 3, 55 x 8
+        - Training max: 61 kgs
+        - week: 2
+        Pull-up: 5 x 9/4/2
+        Press: 42 x 10/3/2
+        Handstands: 12, 8
+        - unit: breaths
+        """)
+}
 
 
 TEST_SET_STRINGS = {
@@ -129,7 +167,7 @@ def test_master_parsing():
     """If it can parse this, it's probably good."""
     test_str = \
         '100 x 5, 7, 70, 80,90 x 6, 110 x 6,5, 4, 120 x 3 (2), 2, 100 x 5/4/3'
-    sets = parse_sets(test_str)
+    sets = Set.parse_sets(test_str)
     assert len(sets) == 12
 
 
@@ -137,11 +175,10 @@ def test_master_parsing():
 def test_parsing():
     case_name = 'same_reps'
     case = TEST_SET_STRINGS[case_name]
-    sets = parse_sets(case.string)
+    sets = Set.parse_sets(case.string)
     assert len(sets) == len(case.exp)
 
 
-@pytest.mark.skip()
 def test_set_parsing_regression():
     """Regression test that we don't break existing set-parsing abilities."""
     vetted = (
@@ -150,5 +187,5 @@ def test_set_parsing_regression():
     )
     for name in vetted:
         case = TEST_SET_STRINGS[name]
-        sets = parse_sets(case.string)
+        sets = Set.parse_sets(case.string)
         assert len(sets) == len(case.exp)
