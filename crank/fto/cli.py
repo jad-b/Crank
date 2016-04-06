@@ -22,6 +22,8 @@ def read_until_valid(prompt, valid_inputs=None, lmbda=None):
     :arg ``func`` lmbda: Function to call on received inputs. Any errors will
         result in a re-prompting.
     """
+    if valid_inputs:
+        prompt += ' ' + str(valid_inputs) + ') '
     while True:
         user_input = input(prompt).strip(string.whitespace)
         # Apply a given function

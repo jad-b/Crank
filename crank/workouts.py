@@ -21,6 +21,10 @@ class Workouts:
         self.workouts = sortedset(workouts)
         self.modified = None
 
+    @property
+    def length(self):
+        return len(self.workouts)
+
     def upgrade(self):
         """Upgrade workouts to a new syntax."""
         for i, w in enumerate(self.workouts):
