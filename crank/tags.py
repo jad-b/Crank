@@ -1,4 +1,3 @@
-from crank.parser import ParseCallback
 from crank.logging import logger
 
 
@@ -22,4 +21,4 @@ def parse_tag(line):
     try:
         return line.lstrip('- ').split(':')
     except:
-        return ParseCallback('Tag: {}'.format(line), parse_tag)
+        return line

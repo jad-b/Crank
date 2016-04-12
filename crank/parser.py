@@ -1,34 +1,12 @@
 from datetime import datetime
 import re
 
+from colorama import Fore, Style
 import dateutil.parser
 
 from crank.logging import logger
-from crank.fto.cli import read_until_valid
-from crank.set import fix_set_string
-
-
-class ParseCallback:
-
-    def __init__(self, field, value, callback):
-        self.field = field
-        self.value = value
-        self.callback = callback
-
-    def resolve(self):
-        # Display incorrect field
-        print("{}: {}".format(self.field, self.value))
-        done = 'no'
-        while done not in ('y', 'yes'):
-            # Request user correction
-            redo = input('Please enter the corrected value: ').strip()
-            # Verify input
-            done = input('Does this look right? "{}" '.format(redo))
-        # Apply callback
-        return self.callback(redo)
-
-    def __str__(self):
-        return "{}: {}".format(self.field, self.value)
+from crank.fto.cli import read_until_valid, confirm_input
+from crank.set import fix_set_string, Set
 
 
 def fix_workouts(wkts):
@@ -53,24 +31,25 @@ def raw_sets(wkts):
 
 def guided_mediation(w, ex, raw):
     """CLI prompts to fix Set strings well-enough for reading."""
-    print("Original: ", raw)
+    print("{}| Original Set string: {}".format(ex.name, raw))
     choice = read_until_valid("Attempt, Rewrite, Step-through, Skip, or Drop?",
                               ['a', 'r', 's', 'k', 'd'])
     if choice == 'a':
-        # Attempt to partition sets into reasonable partitions
+        # Attempt to parse sets into reasonable partitions
         parts = partition_set_string(raw)
         print("Estimated Set partitions:\n\t" + '\n\t'.join(parts))
         good = read_until_valid("Does this look good?", ['y', 'n'])
         if good == 'y':
-            process_set_partitions(parts)
+            ex.sets = process_set_partitions(parts)
+            ex.raw_sets = ''
     elif choice == 'r':
-        fix_set_string(raw)
+        guided_mediation(w, ex, fix_set_string(raw))
     elif choice == 's':
         sets = step_through_set_string(raw)
-        ex.sets = sets
+        ex.sets = process_set_partitions(sets)
         ex.raw_sets = ''
     elif choice == 'd':
-        yep = read_until_valid('Are you sure? [y/n]) ', ['y', 'n'])
+        yep = read_until_valid('Delete; are you sure? ', ['y', 'n'])
         if yep == 'y':
             w.remove(ex)
         else:
@@ -84,6 +63,7 @@ def partition_set_string(s):
     fail), and represents a "best-guess" partitioning. If the partitioning is
     correct, the output can be unambiguously converted into Sets.
     """
+
     return [(), ()]
 
 
@@ -95,6 +75,20 @@ def process_set_partitions(parts):
     values, creating three Sets.
     """
     sets = []
+    for piece in parts:
+        if len(piece[0]) == 1 and len(piece[1]) == 1:
+            sets.append(Set(piece[0][0], piece[1][0]))
+        elif len(piece[0]) > 1 and len(piece[1]) == 1:
+            rep = piece[1][0]
+            for w in piece[0]:
+                sets.append(Set(w, rep))
+        elif len(piece[0]) == 1 and len(piece[1]) > 1:
+            w = piece[0][0]
+            for rep in piece[1]:
+                sets.append(Set(w, rep))
+        else:
+            raise ValueError("Invalid (work, rep) tuple:\n{}"
+                             .format(str(parts)))
     return sets
 
 
@@ -112,14 +106,25 @@ def step_through_set_string(s):
     print("Original: ", s)
     for m in re.finditer(chunk_re, s):
         val = m.group().strip()
-        wr = read_until_valid(val + "\n\tWork or Reps?", ['w', 'r'])
+        if val == 'x':
+            print("Saw 'x'")
+            continue
+        prompt = "({}) Work or Reps?".format(Fore.GREEN + val + Style.RESET_ALL)
+        wr = read_until_valid(prompt, ['w', 'r'])
         if wr == 'w':
             if last == 'r':
                 # Save the split we arrived at
                 parts.append((tuple(workbuf), tuple(repbuf)))
+                workbuf, repbuf = list(), list()
             workbuf.append(int(val))
         elif wr == 'r':
-            repbuf.append(int(val))
+            try:
+                repbuf.append(int(val))
+            except ValueError:  # Not an int
+                rewrite = input('Please space-separate the reps: ')
+                while not confirm_input(rewrite):
+                    rewrite = input('Please space-separate the reps: ')
+                repbuf.extend(map(int, rewrite.split(' ')))
         last = wr
     return parts
 
@@ -177,20 +182,3 @@ def buffer_data(source, delim='\n'):
 
 def split_iter(string, delim_pattern=r"[^\n]+"):
     return (x.group(0) for x in re.finditer(delim_pattern, string))
-
-
-def dfs(nest, fn):
-    for i in nest:
-        # Keep recurring
-        if isinstance(nest, list):
-            dfs(i, fn)
-        if isinstance(nest, dict):
-            dfs(nest[i], fn)
-        # not a list or dict; evaluate for error
-        else:
-            fn(nest, i)
-
-
-def resolve_errors(struct, idx):
-    if isinstance(struct[idx], ParseCallback):
-        struct[idx] = struct[idx].callback()
