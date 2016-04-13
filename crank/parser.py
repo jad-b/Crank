@@ -6,7 +6,7 @@ import dateutil.parser
 
 from crank.logging import logger
 from crank.fto.cli import read_until_valid, confirm_input
-from crank.set import fix_set_string, Set
+from crank.set import fix_set_string, Set, string_tokenizer, process_rep
 
 
 def fix_workouts(wkts):
@@ -63,8 +63,20 @@ def partition_set_string(s):
     fail), and represents a "best-guess" partitioning. If the partitioning is
     correct, the output can be unambiguously converted into Sets.
     """
-
-    return [(), ()]
+    buf, workbuf = [], []
+    parser = string_tokenizer(s)
+    prev = ''
+    for val in parser:
+        if val == 'x':
+            pass
+        elif prev == 'x':  # This value is a rep
+            vals = process_rep(val)
+            buf.append((tuple(workbuf), tuple(vals)))
+            workbuf = []
+        else:
+            workbuf.append(int(val))
+        prev = val
+    return buf
 
 
 def process_set_partitions(parts):

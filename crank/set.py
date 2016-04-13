@@ -1,5 +1,4 @@
 from typing import List, TypeVar
-import copy
 import re
 import textwrap
 
@@ -215,22 +214,6 @@ def split_reps(w, reps):
     return r, w
 
 
-def process_rep(w, r, last_set):
-    logger.debug("Processing :d{} x {:d}".format(w, r))
-    try:  # To save it as a normal rep
-        r = int(r)
-        # Compare against
-        return [Set(work=w, reps=r)]
-    except ValueError:
-        # try our special cases
-        setz = rest_pause(w, r)
-        if setz:
-            return setz
-        setz = multiply_reps(last_set, r)
-        if setz:
-            return setz
-
-
 def demux_work(work, reps) -> (List[SetType]):
     """Parses a run of sets at the same level of work.
 
@@ -280,32 +263,37 @@ def work_rep_sim(work, reps):
     return i, np.array(sims)/np.max([work]+reps)
 
 
-def rest_pause(base_work, rp_str) -> List[SetType]:
+def process_rep(r):
+    try:  # To save it as a normal rep
+        return (int(r),)
+    except ValueError:
+        # try our special cases
+        setz = rest_pause(r)
+        if setz:
+            return setz
+        setz = multiply_reps(r)
+        if setz:
+            return setz
+
+
+def rest_pause(r):
     """Parses a rest-pause set into multiple sets."""
     sets = []
-    rest_pause = rp_str.split('/')
+    rest_pause = r.split('/')
     if len(rest_pause) > 1:
-        logger.debug("\tRest-Pause set of {:d} x {} found".format(base_work,
-                                                                  rp_str))
         for rep in rest_pause:
-            sets.append(Set(work=base_work,
-                            reps=int(rep.strip()),
-                            rest=30  # A default
-                            ))
+            sets.append(int(rep.strip()))
     return sets
 
 
-def multiply_reps(last_set, multiplier) -> List[SetType]:
+def multiply_reps(r):
     """Multiplies the previous set."""
     sets = []
     # Look for the multiplier notation: (\d+)
-    m = re.match(r'\((\d+)\)', multiplier)
+    m = re.match(r'(\d+)\s*\((\d+)\)', r)
     if m:  # Rep multiplier; 100 x 3 (5)
-        mult = int(m.groups()[0])
-        logger.debug("\tMultiplying {:d} x {:d} for {:d} sets".format(
-            last_set.work, last_set.reps, mult))
+        val, mult = int(m.groups()[0]), int(m.groups()[1])
         # Make add'l copies of the previous set
-        for i in range(mult-1):
-            sets.append(copy.copy(last_set))
-
+        for i in range(mult):
+            sets.append(val)
     return sets

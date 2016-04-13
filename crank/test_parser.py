@@ -1,7 +1,5 @@
 from collections import namedtuple
 
-import pytest
-
 from crank import parser
 from crank.set import Set, string_tokenizer
 
@@ -39,7 +37,6 @@ def test_string_tokenizer():
         assert list(string_tokenizer(tc.raw)) == tc.pieces
 
 
-@pytest.mark.xfail
 def test_set_string_partitioning():
     for tc in test_cases:
         assert parser.partition_set_string(tc.raw) == tc.work_reps
