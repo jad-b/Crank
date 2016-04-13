@@ -1,8 +1,6 @@
 import json
 import os
 
-from blist import blist
-
 from crank.workouts import Workouts, WorkoutsJSONEncoder, WorkoutsJSONDecoder
 
 
@@ -22,7 +20,8 @@ def test_workouts_storage():
 
     wkts2 = Workouts.load(wkts_filename)
     assert len(wkts2.workouts) == 43, wkts2.workouts
-    assert isinstance(wkts2.workouts, blist)
+    assert not isinstance(wkts2.workouts, list), \
+        "Workouts shouldn't be in a list"
 
 
 def test_workouts_encoding():

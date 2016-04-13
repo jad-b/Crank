@@ -50,7 +50,7 @@ def process_input():
     """Guide user through weight calculations via CLI prompts."""
     name = read_until_valid("Please enter the exercise name: ",
                             lmbda=lambda x: x.capitalize())
-    kgs = read_until_valid("Kilograms? y/n: ", ('y', 'n'))
+    kgs = read_until_valid("Kilograms?", ('y', 'n'))
     week = read_until_valid("Enter current training week: ", lmbda=int)
     weight = read_until_valid("Enter max weight: ", lmbda=int)
     units = MassUnit.kilograms if kgs == 'y' else MassUnit.lbs

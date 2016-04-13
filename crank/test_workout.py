@@ -17,10 +17,10 @@ TEST_WORKOUT_LINES = [
 
 
 TEST_WORKOUT_EXERCISES = [
-    Exercise.parse_wkt([TEST_WORKOUT_LINES[2]]),
-    Exercise.parse_wkt(TEST_WORKOUT_LINES[3:6]),
-    Exercise.parse_wkt([TEST_WORKOUT_LINES[6]]),
-    Exercise.parse_wkt([TEST_WORKOUT_LINES[7]])
+    Exercise.parse_exercise([TEST_WORKOUT_LINES[2]]),
+    Exercise.parse_exercise(TEST_WORKOUT_LINES[3:6]),
+    Exercise.parse_exercise([TEST_WORKOUT_LINES[6]]),
+    Exercise.parse_exercise([TEST_WORKOUT_LINES[7]])
 ]
 TEST_WORKOUT = Workout(timestamp=TEST_WORKOUT_LINES[0],
                        tags={'comment': TEST_WORKOUT_LINES[1][2:]},

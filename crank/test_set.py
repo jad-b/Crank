@@ -135,19 +135,18 @@ def test_rep_detection():
         TestCase(20, [12, 13, 23, 22], 2)
     )
     predictions = {}
-    # import pdb
     for c in cases:
         predictions[str(c.reps)] = {
             'max_err': max_err(c.work, c.reps),
             'max_slope': max_slope(c.reps),
             'work_rep_sim': work_rep_sim(c.work, c.reps)
         }
-    # pdb.set_trace()
     from pprint import pprint
     pprint(predictions)
+    # No actual assertion is made, besides that no syntax errors occur.
 
 
-@pytest.mark.skip()
+@pytest.mark.xfail()
 def test_rest_pause():
     rp_str = '5/4/3'
     test_weight = 100
@@ -162,21 +161,16 @@ def test_rest_pause():
     assert rest_pause(test_weight, '543') == []
 
 
-@pytest.mark.skip()
-def test_master_parsing():
+@pytest.mark.xfail()
+def test_parsing_hard_string():
     """If it can parse this, it's probably good."""
     test_str = \
         '100 x 5, 7, 70, 80,90 x 6, 110 x 6,5, 4, 120 x 3 (2), 2, 100 x 5/4/3'
-    sets = Set.parse_sets(test_str)
+    try:
+        sets = Set.parse_sets(test_str)
+    except SyntaxError:
+        pytest.fail("Told you it was hard")
     assert len(sets) == 12
-
-
-@pytest.mark.skip()
-def test_parsing():
-    case_name = 'same_reps'
-    case = TEST_SET_STRINGS[case_name]
-    sets = Set.parse_sets(case.string)
-    assert len(sets) == len(case.exp)
 
 
 def test_set_parsing_regression():
