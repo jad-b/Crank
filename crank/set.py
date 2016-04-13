@@ -117,16 +117,23 @@ def fix_set_string(string):
     return s
 
 
+def string_tokenizer(string):
+    """Yield parsed components of a set string."""
+    # An 'x', or everything not an x, comma, or whitespace
+    chunk_re = r'(x|[^x,\s]+)'
+    for m in re.finditer(chunk_re, string):
+        yield m.group().strip()
+
+
 def parse_complex_sets(string):
     """Iteratively parse a Set string."""
     logger.debug("Parsing Sets from: {}".format(string))
-    chunk_re = r'(x|[^x,\s]+)'
-    parser = re.finditer(chunk_re, string)
+    parser = string_tokenizer(string)
 
     # All numbers up to the first X are work sets
     work = []
     while True:
-        val = next(parser).group().strip()
+        val = next(parser)
         if val == 'x':
             break
         work.append(val)
