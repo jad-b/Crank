@@ -2,9 +2,10 @@ from collections import namedtuple
 
 import pytest
 
-from crank.core.set import (Set, rest_pause, max_err, max_slope, work_rep_sim,
-                            process_set_partitions, partition_set_tokens,
-                            string_tokenizer)
+from crank.core.set_v1 import (Set, rest_pause, max_err, max_slope,
+                               work_rep_sim, process_set_partitions,
+                               partition_set_tokens, string_tokenizer,
+                               parse_v1_sets)
 
 
 class SetCase:
@@ -145,7 +146,7 @@ def test_set_parsing_regression():
     )
     for name in vetted:
         case = TEST_SET_STRINGS[name]
-        sets = Set.parse_sets(case.string)
+        sets, _ = parse_v1_sets(case.string)
         assert len(sets) == len(case.exp)
 
 

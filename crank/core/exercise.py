@@ -2,6 +2,7 @@ from collections.abc import Iterable, Mapping
 from pprint import pformat
 
 from crank.core.set import Set
+from crank.core.set_v1 import parse_v1_sets
 from crank.core.tags import parse_tags
 from crank.util.logging import logger
 
@@ -11,7 +12,7 @@ class Exercise:
     def __init__(self,
                  name='',
                  sets=None,
-                 raw_sets='',
+                 raw_sets=None,
                  tags=None):
         self.name = name
         assert isinstance(self.name, str)
@@ -19,8 +20,10 @@ class Exercise:
         assert isinstance(self.sets, Iterable)
         self.tags = tags or {}
         assert isinstance(self.tags, Mapping)
-        self.raw_sets = raw_sets
-        assert isinstance(self.raw_sets, str)
+        if raw_sets:
+            self.raw_sets = raw_sets
+        else:
+            self.raw_sets = None
 
     @classmethod
     def parse(cls, lines):
@@ -33,7 +36,7 @@ class Exercise:
         try:
             ex['sets'], lines = Set.parse_sets(lines)
         except ValueError:
-            ex['sets'], ex['raw_sets'] = Set.parse_sets(remainder)
+            ex['sets'], ex['raw_sets'] = parse_v1_sets(remainder)
         return Exercise(**ex), lines
 
     @classmethod

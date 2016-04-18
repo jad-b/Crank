@@ -14,23 +14,18 @@ SET_REGEX = re.compile(
 class Set:
 
     def __init__(self,
-                 work=-1,
+                 work=0,
                  reps=0,
-                 rest=-1,
-                 order=-1) -> None:
-        if isinstance(work, str):
-            work = int(work)
-        self.work = work or -1
-
-        if isinstance(reps, str):
-            reps = int(reps)
+                 rest=0,
+                 order=0) -> None:
+        self.work = work or 0
+        assert isinstance(self.work, int)
         self.reps = reps or 0
-
-        if isinstance(rest, str):
-            rest = int(rest)
-        self.rest = rest or -1
-
-        self.order = order or -1
+        assert isinstance(self.reps, int)
+        self.rest = rest or 0
+        assert isinstance(self.rest, int)
+        self.order = order or 0
+        assert isinstance(self.order, int)
 
     @classmethod
     def parse(cls, string):
@@ -48,14 +43,17 @@ class Set:
         m = ptn.match(string)
         if not m:
             return []
-        groups = dict(m.groupdict())
-        order_string = groups.get('order')
-        # Can't give Set(...) a string for order=
-        del groups['order']
         # Pass it through the Set Constructor to filter out values
-        base = Set(**groups)
+        gd = m.groupdict()
+        vals = {}
+        for attr in ['work', 'reps', 'rest']:
+            v = gd.get(attr)
+            if v:
+                vals[attr] = int(v)
+        base = Set(**vals)
+
         sets = []
-        for o in parse_ordering(order_string):
+        for o in parse_ordering(gd['order']):
             s = copy.copy(base)
             s.order = o
             sets.append(s)
@@ -75,12 +73,12 @@ class Set:
         return sets, lines[len(sets):]
 
     def to_json(self):
-        return {
-            'work': self.work,
-            'reps': self.reps,
-            'order': self.order,
-            'rest': self.rest,
-        }
+        d = {}
+        for attr in ['work', 'reps', 'rest', 'order']:
+            v = getattr(self, attr)
+            if v:
+                d[attr] = v
+        return d
 
     @classmethod
     def from_json(cls, d):

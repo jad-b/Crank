@@ -1,7 +1,7 @@
 from unittest import TestCase
 from itertools import repeat
 
-from crank.ssp.crank import Accumulator, Aggregator
+from crank.program.ssp.crank import Accumulator, Aggregator
 
 
 class TestAccumulatorCases(TestCase):

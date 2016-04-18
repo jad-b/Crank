@@ -6,7 +6,7 @@ User-facing command-line functions for :module:`fto.logic`.
 """
 from argparse import ArgumentParser
 
-from crank.fto.logic import print_exercise, MassUnit
+from crank.program.fto.logic import print_exercise, MassUnit
 from crank.util.cli import read_until_valid
 
 

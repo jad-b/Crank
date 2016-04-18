@@ -6,7 +6,7 @@ Unit tests for Crank (tm)
 """
 from unittest import TestCase
 
-from crank.ssp.crank import Accumulator
+from crank.program.ssp.crank import Accumulator
 
 
 class TestAccumulator(TestCase):

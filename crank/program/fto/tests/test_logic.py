@@ -6,7 +6,7 @@ Tests for the :module:`fto.logic`.
 """
 from unittest import TestCase
 
-from crank.fto import logic
+from crank.program.fto import logic
 
 
 class TestGetMaxFromPrevious(TestCase):

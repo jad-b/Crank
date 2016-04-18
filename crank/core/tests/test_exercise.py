@@ -39,26 +39,26 @@ TEST_SQUAT_LINES = TEST_EXERCISE_V2_LINES[3:13]
 TEST_SQUAT_V2_JSON = {
     'name': 'Squat',
     'tags': {
-        'unit': 'kgs x reps',
+        'unit': 'kg',
         'comment': 'coming off drill weekend, tired and small',
     },
     'sets': [
         {'work': 20, 'reps': 5, 'order': 2},
-        {'work': 60, 'reps': 5, 'order': 2, 'rest': 30},
-        {'work': 80, 'reps': 3, 'order': 2},
-        {'work': 90, 'reps': 3, 'order': 2, 'rest': 30},
-        {'work': 91, 'reps': 5, 'order': 2},
-        {'work': 105, 'reps': 5, 'order': 2},
-        {'work': 119, 'reps': 4, 'order': 2, 'rest': 300},
+        {'work': 60, 'reps': 5, 'order': 3, 'rest': 30},
+        {'work': 80, 'reps': 3, 'order': 4},
+        {'work': 90, 'reps': 3, 'order': 5, 'rest': 30},
+        {'work': 91, 'reps': 5, 'order': 6},
+        {'work': 105, 'reps': 5, 'order': 7},
+        {'work': 119, 'reps': 4, 'order': 8, 'rest': 300},
     ],
 }
 
-TEST_EXERCISE = Exercise(**TEST_SQUAT_V2_JSON)
+TEST_EXERCISE = Exercise.from_json(TEST_SQUAT_V2_JSON)
 
 
 def test_exercise_parsing():
-    ex = Exercise.parse_exercise(TEST_SQUAT_LINES)
-    assert ex == TEST_EXERCISE, str(ex)
+    ex, _ = Exercise.parse(TEST_SQUAT_LINES)
+    assert ex == TEST_EXERCISE
 
 
 def test_to_json():

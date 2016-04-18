@@ -1,17 +1,19 @@
 import re
 import textwrap
-from typing import List
 
 import numpy as np
 
-from crank.core.set import Set, SetType
+from crank.core.set import Set
 from crank.util.logging import logger
 from crank.util.cli import confirm_input
 
 
-def parse_v1_set(value):
+def parse_v1_sets(value):
     sets = parse_simple_sets(value)
-    return validate_sets(value, sets)
+    try:
+        return validate_sets(value, sets), ''
+    except SyntaxError:
+        return [], value
 
 
 def set_parsing_pipeline(s):
@@ -218,7 +220,7 @@ def split_reps(w, reps):
     return r, w
 
 
-def demux_work(work, reps) -> (List[SetType]):
+def demux_work(work, reps):
     """Parses a run of sets at the same level of work.
 
     Uses an error heuristic to determine where the next rep might actually be

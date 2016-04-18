@@ -5,7 +5,8 @@ from crank.core.workouts import (Workouts, WorkoutsJSONEncoder,
                                  WorkoutsJSONDecoder)
 
 
-TEST_WKT_FILE = 'crank/squat.wkt'
+parent = os.path.dirname(os.path.abspath(__file__))
+TEST_WKT_FILE = os.path.join(parent, 'fixtures', 'squat.wkt')
 
 
 def test_workouts_storage():

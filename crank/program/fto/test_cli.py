@@ -2,7 +2,7 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
-from crank.fto.cli import process_input
+from crank.program.fto.cli import process_input
 
 
 class TestCLI(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestCLI(unittest.TestCase):
         ]
 
         # Mock input's return values and capture stdout
-        with patch("crank.fto.cli.input", side_effect=inputs), \
+        with patch("crank.program.fto.cli.input", side_effect=inputs), \
                 patch('sys.stdout', new_callable=StringIO) as mock_stdout:
             process_input()
 
