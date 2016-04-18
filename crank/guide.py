@@ -2,8 +2,9 @@ import re
 
 from colorama import Fore, Style
 
-from crank.fto.cli import read_until_valid, confirm_input
-from crank.set import fix_set_string, Set, string_tokenizer, process_rep
+from crank.util.cli import read_until_valid, confirm_input
+from crank.core.set import (fix_set_string, partition_set_tokens,
+                            process_set_partitions)
 
 
 def fix_workouts(wkts):
@@ -97,80 +98,3 @@ def step_through_set_string(s):
                 repbuf.extend(map(int, rewrite.split(' ')))
         last = wr
     return parts
-
-
-def set_parsing_pipeline(s):
-    """Parse sets through a series of steps.
-
-        1. string => Tokenize => [int]
-        2. Partition => [(work,), (reps,)]
-        3. Process => [Set]
-
-    If an error occurs during any step, the original value is returned.
-    """
-    # Tokenize set string
-    tokens = None
-    try:
-        tokens = string_tokenizer(s)
-    except:
-        return s
-    # Partition tokens into collections of work and rep pairings
-    parts = None
-    try:
-        parts = partition_set_tokens(tokens)
-    except:
-        return list(tokens)
-    # Process partitions into a list of Sets
-    sets = None
-    try:
-        sets = process_set_partitions(parts)
-    except:
-        return parts
-    return sets
-
-
-def partition_set_tokens(tokens):
-    """Divide a raw Set string into collections of work and repetitions.
-
-    This process is guided by basic syntax rules (and heuristics where those
-    fail), and represents a "best-guess" partitioning. If the partitioning is
-    correct, the output can be unambiguously converted into Sets.
-    """
-    buf, workbuf = [], []
-    prev = ''
-    for token in tokens:
-        if token == 'x':
-            pass
-        elif prev == 'x':  # This value is a rep
-            vals = process_rep(token)
-            buf.append((tuple(workbuf), tuple(vals)))
-            workbuf = []
-        else:
-            workbuf.append(int(token))
-        prev = token
-    return buf
-
-
-def process_set_partitions(parts):
-    """Convert a pre-partitioned list of (work, rep) tuples into Set objects.
-
-    This function can handle shorthand expansion, e.g. a tuple like
-    ``((150,), (8, 6, 3))`` knows to apply the Work, 150, across all three Rep
-    values, creating three Sets.
-    """
-    sets = []
-    for piece in parts:
-        if len(piece[0]) == 1 and len(piece[1]) == 1:
-            sets.append(Set(piece[0][0], piece[1][0]))
-        elif len(piece[0]) > 1 and len(piece[1]) == 1:
-            rep = piece[1][0]
-            for w in piece[0]:
-                sets.append(Set(w, rep))
-        elif len(piece[0]) == 1 and len(piece[1]) > 1:
-            w = piece[0][0]
-            for rep in piece[1]:
-                sets.append(Set(w, rep))
-        else:
-            raise ValueError("Invalid (work, rep) tuple:\n{}"
-                             .format(str(parts)))
-    return sets

@@ -2,11 +2,11 @@ from collections.abc import Iterable, Mapping
 from datetime import datetime
 from pprint import pformat
 
-from crank.exercise import parse_exercises, Exercise
-from crank.fto.cli import read_until_valid
-from crank.logging import logger
-from crank.parser import parse_timestamp
-from crank.tags import parse_tags
+from crank.core.exercise import parse_exercises, Exercise
+from crank.util.cli import read_until_valid
+from crank.util.logging import logger
+from crank.util.time import parse_timestamp
+from crank.core.tags import parse_tags
 
 
 class Workout:

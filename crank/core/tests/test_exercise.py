@@ -1,4 +1,4 @@
-from crank.exercise import Exercise, parse_exercises
+from crank.core.exercise import Exercise
 
 
 TEST_EXERCISE_LINES = [
@@ -82,5 +82,5 @@ def test_encoding():
 
 
 def test_parsing_exercise_lines():
-    exs = parse_exercises(TEST_EXERCISE_LINES)
+    exs = Exercise.parse_exercises(TEST_EXERCISE_LINES)
     assert len(exs) == 4

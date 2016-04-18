@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from crank.workout import Workout
-from crank.exercise import Exercise
+from crank.core.workout import Workout
+from crank.core.exercise import Exercise
 
 
 TEST_WORKOUT_LINES = [

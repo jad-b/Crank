@@ -1,4 +1,4 @@
-from crank import tags
+from crank.core import tags
 
 TEST_TAGS = [
     '- 1RM: 300',

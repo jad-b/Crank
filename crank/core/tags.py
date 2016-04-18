@@ -1,4 +1,4 @@
-from crank.logging import logger
+from crank.util.logging import logger
 
 
 def parse_tags(lines):

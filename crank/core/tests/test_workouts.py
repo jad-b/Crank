@@ -1,7 +1,8 @@
 import json
 import os
 
-from crank.workouts import Workouts, WorkoutsJSONEncoder, WorkoutsJSONDecoder
+from crank.core.workouts import (Workouts, WorkoutsJSONEncoder,
+                                 WorkoutsJSONDecoder)
 
 
 TEST_WKT_FILE = 'crank/squat.wkt'

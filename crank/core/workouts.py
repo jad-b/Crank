@@ -4,8 +4,8 @@ from datetime import datetime
 
 from blist import sortedset
 
-from crank import parser
-from crank.workout import Workout
+from crank.util import stream
+from crank.core.workout import Workout
 
 
 class Workouts:
@@ -64,7 +64,7 @@ class Workouts:
     @classmethod
     def parse_wkt_file(cls, filename):
         """Parse a .wkt file."""
-        return cls.parse_wkt(parser.stream_file(filename))
+        return cls.parse_wkt(stream.stream_file(filename))
 
     @classmethod
     def parse_wkt(cls, wkts):
@@ -76,7 +76,7 @@ class Workouts:
             raise ValueError("Empty value provided")
         ws = cls()
 
-        for wkt_block in parser.buffer_data(wkts):
+        for wkt_block in stream.buffer_data(wkts):
             ws.workouts.add(Workout.parse_wkt(wkt_block))
         return ws
 

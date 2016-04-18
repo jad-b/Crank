@@ -1,3 +1,4 @@
+.eggs/
 workouts.json
 # test files
 *.test

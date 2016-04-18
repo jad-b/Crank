@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from crank.set import Set, parse_ordering
+from crank.core.set import Set, parse_ordering
 
 
 def test_parsing_set_lines():

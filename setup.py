@@ -37,7 +37,7 @@ setup(
         'python-dateutil'
     ],
     setup_requires=[
-        'pytest'
+        'pytest-runner'
     ],
     packages=find_packages(),
     entry_points={
@@ -47,7 +47,6 @@ setup(
     },
     tests_require=[
         'pytest',
-        'pytest-runner',
         'pytest-cov'
     ],
     keywords='workout automation',

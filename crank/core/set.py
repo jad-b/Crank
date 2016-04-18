@@ -33,7 +33,7 @@ class Set:
         self.order = order or -1
 
     @classmethod
-    def parse_set(cls, string):
+    def parse(cls, string):
         SET_V2_RE = r'''
             \s*
             (?P<order>[\d,-]+)\)
@@ -61,13 +61,12 @@ class Set:
             sets.append(s)
         return sets
 
-
     @classmethod
     def parse_sets(cls, lines):
         """Parse a .wkt-formatted string containing one or more Sets."""
         sets = []
         for l in lines:
-            ret = parse_set(l)
+            ret = cls.parse(l)
             if not ret:
                 break
             sets.extend(ret)

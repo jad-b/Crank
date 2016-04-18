@@ -1,9 +1,9 @@
 from collections.abc import Iterable, Mapping
 from pprint import pformat
 
-from crank.logging import logger
-from crank.tags import parse_tags
-from crank.set import Set
+from crank.core.set import Set
+from crank.core.tags import parse_tags
+from crank.util.logging import logger
 
 
 class Exercise:
