@@ -1,10 +1,7 @@
-from datetime import datetime
 import re
 
 from colorama import Fore, Style
-import dateutil.parser
 
-from crank.logging import logger
 from crank.fto.cli import read_until_valid, confirm_input
 from crank.set import fix_set_string, Set, string_tokenizer, process_rep
 
@@ -29,6 +26,15 @@ def raw_sets(wkts):
                 yield (w, ex, ex.raw_sets)
 
 
+def review_raw_sets(wkts):
+    """Show the Sets with unparsed set strings."""
+    i = 0
+    for w, ex, raw in raw_sets(wkts):
+        print("{}: {:s}".format(ex.name, raw))
+        i += 1
+    print("{:d} sets found with raw_sets attributes".format(i))
+
+
 def guided_mediation(w, ex, raw):
     """CLI prompts to fix Set strings well-enough for reading."""
     print("{}| Original Set string: {}".format(ex.name, raw))
@@ -36,7 +42,7 @@ def guided_mediation(w, ex, raw):
                               ['a', 'r', 's', 'k', 'd'])
     if choice == 'a':
         # Attempt to parse sets into reasonable partitions
-        parts = partition_set_string(raw)
+        parts = partition_set_tokens(raw)
         print("Estimated Set partitions:\n\t" + '\n\t'.join(parts))
         good = read_until_valid("Does this look good?", ['y', 'n'])
         if good == 'y':
@@ -54,54 +60,6 @@ def guided_mediation(w, ex, raw):
             w.remove(ex)
         else:
             guided_mediation(w, ex, raw)
-
-
-def partition_set_string(s):
-    """Divide a raw Set string into collections of work and repetitions.
-
-    This process is guided by basic syntax rules (and heuristics where those
-    fail), and represents a "best-guess" partitioning. If the partitioning is
-    correct, the output can be unambiguously converted into Sets.
-    """
-    buf, workbuf = [], []
-    parser = string_tokenizer(s)
-    prev = ''
-    for val in parser:
-        if val == 'x':
-            pass
-        elif prev == 'x':  # This value is a rep
-            vals = process_rep(val)
-            buf.append((tuple(workbuf), tuple(vals)))
-            workbuf = []
-        else:
-            workbuf.append(int(val))
-        prev = val
-    return buf
-
-
-def process_set_partitions(parts):
-    """Convert a pre-partitioned list of (work, rep) tuples into Set objects.
-
-    This function can handle shorthand expansion, e.g. a tuple like
-    ``((150,), (8, 6, 3))`` knows to apply the Work, 150, across all three Rep
-    values, creating three Sets.
-    """
-    sets = []
-    for piece in parts:
-        if len(piece[0]) == 1 and len(piece[1]) == 1:
-            sets.append(Set(piece[0][0], piece[1][0]))
-        elif len(piece[0]) > 1 and len(piece[1]) == 1:
-            rep = piece[1][0]
-            for w in piece[0]:
-                sets.append(Set(w, rep))
-        elif len(piece[0]) == 1 and len(piece[1]) > 1:
-            w = piece[0][0]
-            for rep in piece[1]:
-                sets.append(Set(w, rep))
-        else:
-            raise ValueError("Invalid (work, rep) tuple:\n{}"
-                             .format(str(parts)))
-    return sets
 
 
 def step_through_set_string(s):
@@ -141,56 +99,78 @@ def step_through_set_string(s):
     return parts
 
 
-def parse_timestamp(line):
-    ts_formats = (
-        '%Y %b %d @ %H%M',
-        '%d %b %Y @ %H%M',
-        '%d %B %Y @ %H%M',
-        '%d%b%Y@%H%M',
-        '%d%b%Y @ %H%M',
-    )
+def set_parsing_pipeline(s):
+    """Parse sets through a series of steps.
 
-    # Try ISO8601
+        1. string => Tokenize => [int]
+        2. Partition => [(work,), (reps,)]
+        3. Process => [Set]
+
+    If an error occurs during any step, the original value is returned.
+    """
+    # Tokenize set string
+    tokens = None
     try:
-        return dateutil.parser.parse(line)
+        tokens = string_tokenizer(s)
     except:
-        pass
-    exc = None
-    for fmt in ts_formats:
-        try:
-            return datetime.strptime(line, fmt)
-        except Exception as e:
-            exc = e
-    else:
-        logger.warning("Failed to parse: %s", line)
-        raise exc
+        return s
+    # Partition tokens into collections of work and rep pairings
+    parts = None
+    try:
+        parts = partition_set_tokens(tokens)
+    except:
+        return list(tokens)
+    # Process partitions into a list of Sets
+    sets = None
+    try:
+        sets = process_set_partitions(parts)
+    except:
+        return parts
+    return sets
 
 
-def stream_str_blocks(s):
-    """Group a string into a stream of lists by newline."""
-    return buffer_data(line for line in s.split('\n'))
+def partition_set_tokens(tokens):
+    """Divide a raw Set string into collections of work and repetitions.
 
-
-def stream_file(filename):
-    logger.debug('opening %s', filename)
-    with open(filename) as fp:
-        for line in fp:
-            yield line
-
-
-def buffer_data(source, delim='\n'):
-    """Group data into a stream of lists."""
-    bfr = []
-    for line in source:
-        if line == delim or not line:  # newline or empty string
-            if bfr:  # if there's something there
-                yield list(bfr)  # Return copy of buffer
-                bfr.clear()
+    This process is guided by basic syntax rules (and heuristics where those
+    fail), and represents a "best-guess" partitioning. If the partitioning is
+    correct, the output can be unambiguously converted into Sets.
+    """
+    buf, workbuf = [], []
+    prev = ''
+    for token in tokens:
+        if token == 'x':
+            pass
+        elif prev == 'x':  # This value is a rep
+            vals = process_rep(token)
+            buf.append((tuple(workbuf), tuple(vals)))
+            workbuf = []
         else:
-            bfr.append(line.strip())
-    if bfr:
-        yield bfr
+            workbuf.append(int(token))
+        prev = token
+    return buf
 
 
-def split_iter(string, delim_pattern=r"[^\n]+"):
-    return (x.group(0) for x in re.finditer(delim_pattern, string))
+def process_set_partitions(parts):
+    """Convert a pre-partitioned list of (work, rep) tuples into Set objects.
+
+    This function can handle shorthand expansion, e.g. a tuple like
+    ``((150,), (8, 6, 3))`` knows to apply the Work, 150, across all three Rep
+    values, creating three Sets.
+    """
+    sets = []
+    for piece in parts:
+        if len(piece[0]) == 1 and len(piece[1]) == 1:
+            sets.append(Set(piece[0][0], piece[1][0]))
+        elif len(piece[0]) > 1 and len(piece[1]) == 1:
+            rep = piece[1][0]
+            for w in piece[0]:
+                sets.append(Set(w, rep))
+        elif len(piece[0]) == 1 and len(piece[1]) > 1:
+            w = piece[0][0]
+            for rep in piece[1]:
+                sets.append(Set(w, rep))
+        else:
+            raise ValueError("Invalid (work, rep) tuple:\n{}"
+                             .format(str(parts)))
+    return sets

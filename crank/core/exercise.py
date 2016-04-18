@@ -6,47 +6,6 @@ from crank.tags import parse_tags
 from crank.set import Set
 
 
-def parse_exercises(lines):
-    exs = []
-    while len(lines) > 0:
-        ex, lines = parse_exercise(lines)
-        exs.append(ex)
-        logger.debug("Parsed Exercise:\n%s", ex)
-        # logger.debug("Remaining lines:\n%s", pformat(lines))
-    return exs
-
-
-def parse_exercise(lines):
-    # logger.debug("Parsing Exercise from:\n%s", lines)
-    # Exercise name & sets
-    ex = {}
-    ex['name'], ex['raw_sets'] = parse_exercise_name(lines[0])
-    ex['raw_sets'] = ex['raw_sets'].strip()
-    ex['name'] = ex['name'].strip()
-    lines = lines[1:]
-    # Tags
-    if lines:
-        ex['tags'], lines = parse_tags(lines)
-    # Sets
-    try:
-        ex['sets'] = Set.parse_sets(ex['raw_sets'])
-        ex.pop('raw_sets')  # Remove raw string after successful parse
-    except SyntaxError:
-        logger.warning("Failed to parse %s", ex['raw_sets'])
-    return Exercise(**ex), lines
-
-
-def parse_exercise_name(line):
-    try:
-        name_sets = line.split(':')
-        if len(name_sets) != 2:
-            return line
-        return name_sets[0], name_sets[1]
-    except Exception:
-        logger.exception('Error while parsing exercise name from %s', line)
-        return line
-
-
 class Exercise:
 
     def __init__(self,
@@ -64,11 +23,29 @@ class Exercise:
         assert isinstance(self.raw_sets, str)
 
     @classmethod
-    def parse_exercise(cls, lines):
-        ex, lines = parse_exercise(lines)
-        # No lines should be leftover
-        assert not lines, "Content remaining after parsing: {}".format(lines)
-        return ex
+    def parse(cls, lines):
+        ex = {}
+        ex['name'], remainder = parse_exercise_name(lines[0])
+        lines = lines[1:]
+        # Tags
+        ex['tags'], lines = parse_tags(lines)
+        # Sets
+        try:
+            ex['sets'], lines = Set.parse_sets(lines)
+        except ValueError:
+            ex['sets'], ex['raw_sets'] = Set.parse_sets(remainder)
+        return Exercise(**ex), lines
+
+    @classmethod
+    def parse_exercises(cls, lines):
+        exs = []
+        while len(lines) > 0:
+            ex, lines = Exercise.parse(lines)
+            exs.append(ex)
+            logger.debug("Parsed Exercise:\n%s", ex)
+            # logger.debug("Remaining lines:\n%s", pformat(lines))
+        assert not lines, "Unparsed lines after exercise parsing"
+        return exs
 
     def upgrade(self):
         if self.raw_sets:
@@ -79,12 +56,14 @@ class Exercise:
                 logger.warning("Failed to parse %s", self.raw_sets)
 
     def to_json(self):
-        return {
+        d = {
             'name': self.name,
             'tags': self.tags,
-            'sets': [s.to_json() for s in self.sets],
-            'raw_sets': self.raw_sets
+            'sets': [s.to_json() for s in self.sets]
         }
+        if self.raw_sets:
+            d['raw_sets'] = self.raw_sets
+        return d
 
     @classmethod
     def from_json(cls, d):
@@ -108,3 +87,14 @@ class Exercise:
 
     def __repr__(self):
         return 'Exercise<{}>'.format(self.name)
+
+
+def parse_exercise_name(line):
+    try:
+        name_sets = line.split(':')
+        if len(name_sets) != 2:
+            return name_sets[0]
+        return name_sets[0], name_sets[1]
+    except Exception:
+        logger.exception('Error while parsing exercise name from %s', line)
+        return line

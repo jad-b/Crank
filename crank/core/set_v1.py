@@ -1,90 +1,17 @@
-from typing import List, TypeVar
 import re
 import textwrap
+from typing import List
 
 import numpy as np
 
+from crank.set import Set
 from crank.logging import logger
 from crank.fto.cli import confirm_input
 
 
-SET_REGEX = re.compile(r'\s*(?P<work>\d+)\s*x\s*(?P<reps>\d+)\s*')
-# Used for type annotations
-SetType = TypeVar('Set')
-
-
-class Set:
-
-    def __init__(self,
-                 work=-1,
-                 reps=0,
-                 rest=-1,
-                 order=-1,
-                 special='') -> None:
-        if isinstance(work, str):
-            work = int(work)
-        assert isinstance(work, int)
-        self.work = work
-
-        if isinstance(reps, str):
-            reps = int(reps)
-        assert isinstance(reps, int)
-        self.reps = reps
-
-        assert isinstance(order, int)
-        self.order = order
-
-        assert isinstance(rest, int)
-        self.rest = rest
-
-        assert isinstance(special, str)
-        self.special = special
-
-    @classmethod
-    def parse_sets(cls, string):
-        """Parse a .wkt-formatted string containing one or more Sets."""
-        assert isinstance(string, str)
-        sets = parse_simple_sets(string)
-        return validate_sets(string, sets)
-
-    def to_json(self):
-        return {
-            'work': self.work,
-            'reps': self.reps,
-            'order': self.order,
-            'rest': self.rest,
-            'special': self.special
-        }
-
-    @classmethod
-    def from_json(cls, d):
-        """Build a Set from a JSON object (dict)."""
-        return cls(**d)
-
-    def __lt__(self, other):
-        """Sets are sorted by their workout order.
-
-        It is invalid to compare Sets outside of the same Workout.
-        """
-        if not isinstance(other, Set):
-            return NotImplemented
-        return self.order < other.order
-
-    def __eq__(self, other):
-        if not isinstance(other, Set):
-            return NotImplemented
-        return (self.order == other.order and
-                self.work == other.work and
-                self.reps == other.reps and
-                self.rest == other.rest)
-
-    def __str__(self):
-        return "Set({:d} x {:d})".format(self.work, self.reps)
-
-    def __repr__(self):
-        return ("Set(work={set.work}, "
-                "reps={set.reps}, rest={set.rest}, "
-                "order={set.order}").format(set=self)
+def parse_v1_set(value):
+    sets = parse_simple_sets(value)
+    return validate_sets(value, sets)
 
 
 def validate_sets(string, sets):

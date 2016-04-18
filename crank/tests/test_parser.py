@@ -15,7 +15,7 @@ def test_split_iter():
     for test_in, test_out in io:
         assert test_out == list(parser.split_iter(test_in))
 
-SetTestCase = namedtuple('TestCase', ['raw', 'pieces', 'work_reps', 'final'])
+SetTestCase = namedtuple('TestCase', ['raw', 'tokens', 'work_reps', 'final'])
 test_cases = (
     SetTestCase(
         '95,115,130,150x5,170x5/3/2, 185x5',
@@ -34,12 +34,12 @@ test_cases = (
 
 def test_string_tokenizer():
     for tc in test_cases:
-        assert list(string_tokenizer(tc.raw)) == tc.pieces
+        assert list(string_tokenizer(tc.raw)) == tc.tokens
 
 
 def test_set_string_partitioning():
     for tc in test_cases:
-        assert parser.partition_set_string(tc.raw) == tc.work_reps
+        assert parser.partition_set_tokens(tc.tokens) == tc.work_reps
 
 
 def test_set_partition_processing():

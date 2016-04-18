@@ -1,13 +1,16 @@
 import subprocess
-from setuptools import setup
+from setuptools import setup, find_packages
 import io
 import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 
 
-def read_version(filename='VERSION'):
-    subprocess.check_output(['git', 'describe', '--abbrev=0', '--tags'])
+def git_version():
+    try:
+        subprocess.check_output(['git', 'describe', '--tags'])
+    except:
+        return '0.0.1'
 
 
 def read(*filenames, **kwargs):
@@ -19,9 +22,36 @@ def read(*filenames, **kwargs):
             buf.append(f.read())
     return sep.join(buf)
 
+
 setup(
+    name='crank',
+    description='Automate your workout',
+    long_description=read('README.md'),
+    version=git_version(),
     author='Jeremy Dobbins-Bucklad',
     author_email='j.american.db@gmail.com',
+    url='http://github.com/jad-b/crank',
+    license='GPLv3',
+    include_package_data=True,
+    install_requires=[
+        'python-dateutil'
+    ],
+    setup_requires=[
+        'pytest'
+    ],
+    packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            'fto=crank.program.fto.cli:process_input'
+        ]
+    },
+    tests_require=[
+        'pytest',
+        'pytest-runner',
+        'pytest-cov'
+    ],
+    keywords='workout automation',
+    platforms='any',
     classifiers=[
         # 'License :: OSI Approved :: MIT',
         'Development Status :: 4 - Beta',
@@ -33,25 +63,4 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    description='Automate your workout',
-    entry_points={
-        'console_scripts': [
-            'fto=crank.fto.cli:process_input'
-        ]
-    },
-    extras_require={
-        'testing': ['nose', 'coverage'],
-    },
-    include_package_data=True,
-    install_requires=[],
-    keywords='workout automation',
-    license='MIT',
-    long_description=read('README.rst'),
-    name='crank',
-    packages=['crank'],
-    platforms='any',
-    test_suite='crank.test.test_crank',
-    tests_require=['nose'],
-    url='http://github.com/jad-b/crank',
-    version=read_version()
 )
