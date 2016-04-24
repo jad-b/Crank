@@ -1,14 +1,20 @@
 import copy
+import itertools
 import re
 
 
-SET_REGEX = re.compile(
-    r'''
+SET_ORDERING_RE = re.compile(r'''
     \s*
-    (?P<work>\d+)
-    \s* x \s*
+    (?P<order>[\d\s,-]+)\)
+    \s*
+    ''', re.X)
+SET_RE = re.compile(r'''
+    (\[(?P<rest>\d+)\])?
+    \s*
+    ((?P<work>\d+) \s* x \s*)?
+    \s*
     (?P<reps>\d+)
-    \s*''', re.X)
+    ''', re.X)
 
 
 class Set:
@@ -29,35 +35,38 @@ class Set:
 
     @classmethod
     def parse(cls, string):
-        SET_V2_RE = r'''
-            \s*
-            (?P<order>[\d,-]+)\)
-            \s*
-            (\[(?P<rest>\d+)\])?
-            \s*
-            ((?P<work>\d+) \s* x \s*)?
-            \s*
-            (?P<reps>\d+)
-            '''
-        ptn = re.compile(SET_V2_RE, flags=re.X)
-        m = ptn.match(string)
-        if not m:
-            return []
-        # Pass it through the Set Constructor to filter out values
-        gd = m.groupdict()
-        vals = {}
-        for attr in ['work', 'reps', 'rest']:
-            v = gd.get(attr)
-            if v:
-                vals[attr] = int(v)
-        base = Set(**vals)
+        # parse ordering groups
+        order_groups, set_str = parse_ordering(string)
+        # parse set information
+        sets = parse_set_body(set_str)
 
-        sets = []
-        for o in parse_ordering(gd['order']):
-            s = copy.copy(base)
-            s.order = o
-            sets.append(s)
-        return sets
+        final = []
+        # Many-to-one order-to-set notation
+        #   4-6) [30] 114 x 8
+        if len(sets) == 1 and len(order_groups) >= 1:
+            base = sets[0]
+            for o in itertools.chain(*order_groups):
+                s = copy.copy(base)
+                s.order = o
+                final.append(s)
+        # One-to-one order-to-set notation
+        #   1-3,5-7) 100 x 8, 110x9
+        elif len(order_groups) == len(sets):
+            for i, og in enumerate(order_groups):  # [(1,2,3), (5,6,7)]
+                for o in og:  # (1,2,3)
+                    s = copy.copy(sets[i])
+                    s.order = o
+                    final.append(s)
+        # One-to-Many notation
+        #   1-3) 100x8, 110x7, 120x 6
+        elif (len(order_groups) == 1 and
+              len(order_groups[0]) == len(sets)):
+            for i, o in enumerate(order_groups[0]):
+                sets[i].order = o
+                final.append(sets[i])
+        else:
+            raise ValueError("Set notation mismatch")
+        return final
 
     @classmethod
     def parse_sets(cls, lines):
@@ -112,14 +121,47 @@ class Set:
 
 
 def parse_ordering(string):
-    parts = string.strip(', ')
+    m = SET_ORDERING_RE.match(string)
+    if not m:
+        raise ValueError(string + " isn't a recognized set string")
+    parts = m.groupdict()['order'].strip(', ')
+    ordering = []
     for s in parts.split(','):
         val = s.strip()
         try:
-            yield int(val)
-        except:
-            m = re.match(r'(\d+)-(\d+)', val)
-            if not m:
+            ordering.append((int(val),))
+        except ValueError:
+            n = re.match(r'(\d+)-(\d+)', val)
+            if not n:
                 raise
-            for n in range(int(m.groups()[0]), int(m.groups()[1])+1):
-                yield n
+            # 'a-d) ...' => (a,b,c,d)
+            ordering.append(tuple(range(int(n.groups()[0]),
+                                        int(n.groups()[1])+1)))
+    return ordering, m.string[m.end():]
+
+
+def parse_set_body(string):
+    sets = []
+    for m in SET_RE.finditer(string):
+        gd = m.groupdict()
+        # Pass it through the Set Constructor to filter out values
+        vals = {}
+        for attr in ['work', 'reps', 'rest']:
+            v = gd.get(attr)
+            if v:
+                vals[attr] = int(v)
+        sets.append(Set(**vals))
+    return sets
+
+
+def group_sets_by_order(sets):
+    sort = sorted(sets, key=lambda x: x.order)
+    ret = []
+    idx = None
+    for s in sort:
+        if s.order > last + 1:
+            buf = tuple()
+            ret.append(buf)
+        last = s.order
+        # Something...
+    return ret

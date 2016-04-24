@@ -1,7 +1,8 @@
 from collections.abc import Iterable, Mapping
+from io import StringIO
 from pprint import pformat
 
-from crank.core.set import Set
+from crank.core.set import Set, group_sets_by_order
 from crank.core.set_v1 import parse_v1_sets
 from crank.core.tags import parse_tags
 from crank.util.logging import logger
@@ -86,10 +87,24 @@ class Exercise:
                 self.raw_sets == o.raw_sets)
 
     def __str__(self):
-        return pformat(self.to_json())
+        """Output in .wkt format."""
+        sio = StringIO()
+        # name:
+        sio.write(self.name + ":\n")
+        # Tags
+        # - name: value
+        for t, v in self.tags:
+            sio.write('- ' + t + ': ' + v + '\n')
+        # Sets
+        # a,b,d-f) w x r, w x r, [rest] work x rep
+        set_groups = group_sets_by_order(self.sets)
+        sio.write(','.join(set_groups.keys()) + ') ')
+        sets = [str(s) for s in self.sets]
+        sio.write(', '.join(sets) + '\n')
+        return sio.getvalue()
 
     def __repr__(self):
-        return 'Exercise<{}>'.format(self.name)
+        return pformat(self.to_json())
 
 
 def parse_exercise_name(line):
