@@ -2,7 +2,7 @@ from collections.abc import Iterable, Mapping
 from io import StringIO
 from pprint import pformat
 
-from crank.core.set import Set, group_sets_by_order
+from crank.core.set import Set
 from crank.core.set_v1 import parse_v1_sets
 from crank.core.tags import parse_tags
 from crank.util.logging import logger
@@ -97,8 +97,7 @@ class Exercise:
             sio.write('- ' + t + ': ' + v + '\n')
         # Sets
         # a,b,d-f) w x r, w x r, [rest] work x rep
-        set_groups = group_sets_by_order(self.sets)
-        sio.write(','.join(set_groups.keys()) + ') ')
+        sio.write(','.join(str(s.order) for s in self.sets) + ') ')
         sets = [str(s) for s in self.sets]
         sio.write(', '.join(sets) + '\n')
         return sio.getvalue()

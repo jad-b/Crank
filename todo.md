@@ -8,7 +8,6 @@
         * [ ] `ratchet`
 * [ ] Create workout templates
     * [ ] Use a flag?
-    * [ ]
 * [ ] Share them via a website
     * [ ] Download saved workouts
     * [ ] Create workouts

@@ -112,7 +112,12 @@ class Set:
                 self.rest == other.rest)
 
     def __str__(self):
-        return "Set({:d} x {:d})".format(self.work, self.reps)
+        s = ''
+        if self.rest:
+            s += '[' + str(self.rest) + '] '
+        if self.work:
+            s += str(self.work) + ' x '
+        return s + str(self.reps)
 
     def __repr__(self):
         return ("Set(work={set.work}, "
@@ -152,16 +157,3 @@ def parse_set_body(string):
                 vals[attr] = int(v)
         sets.append(Set(**vals))
     return sets
-
-
-def group_sets_by_order(sets):
-    sort = sorted(sets, key=lambda x: x.order)
-    ret = []
-    idx = None
-    for s in sort:
-        if s.order > last + 1:
-            buf = tuple()
-            ret.append(buf)
-        last = s.order
-        # Something...
-    return ret

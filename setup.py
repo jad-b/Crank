@@ -23,6 +23,14 @@ def read(*filenames, **kwargs):
     return sep.join(buf)
 
 
+install_requires = [
+    'python-dateutil'
+]
+tests_require = [
+    'pytest',
+    'pytest-cov'
+] + install_requires
+
 setup(
     name='crank',
     description='Automate your workout',
@@ -33,9 +41,7 @@ setup(
     url='http://github.com/jad-b/crank',
     license='GPLv3',
     include_package_data=True,
-    install_requires=[
-        'python-dateutil'
-    ],
+    install_requires=install_requires,
     setup_requires=[
         'pytest-runner'
     ],
@@ -45,10 +51,7 @@ setup(
             'fto=crank.program.fto.cli:process_input'
         ]
     },
-    tests_require=[
-        'pytest',
-        'pytest-cov'
-    ],
+    tests_require=tests_require,
     keywords='workout automation',
     platforms='any',
     classifiers=[
